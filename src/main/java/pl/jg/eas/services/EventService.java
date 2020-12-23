@@ -7,13 +7,16 @@ import pl.jg.eas.dao.RoleRepository;
 import pl.jg.eas.dao.UserRepository;
 import pl.jg.eas.dtos.EventShortInfoDto;
 import pl.jg.eas.dtos.NewEventForm;
+import pl.jg.eas.dtos.EventInfoDto;
 import pl.jg.eas.entities.Event;
 import pl.jg.eas.entities.Role;
 import pl.jg.eas.entities.User;
+import pl.jg.eas.exceptions.EventDoesntExistException;
 import pl.jg.eas.exceptions.RoleDoesntExistException;
 import pl.jg.eas.exceptions.UserDoesntExistException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,8 @@ public class EventService {
         this.eventRepository = eventRepository;
         this.roleRepository = roleRepository;
     }
+
+    private final LocalDate now = LocalDate.now();
 
     public void addEvent(NewEventForm newEventForm) {
         final String currentlyLoggedUserEmail = userContextService.getCurrentlyLoggedUserEmail();
@@ -60,15 +65,66 @@ public class EventService {
     }
 
     public List<EventShortInfoDto> getCurrentAndFutureEvents() {
-        final LocalDate now = LocalDate.now();
-        return eventRepository.findAllByEndDateAfter(now, Sort.by("startDate").ascending())
+        return eventRepository.findByEndDateAfter(now, Sort.by("startDate").ascending())
                 .stream()
                 .map(event -> new EventShortInfoDto(
+                        event.getId(),
                         event.getTitle(),
                         event.getStartDate(),
                         event.getEndDate(),
                         event.getDescription()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public List<EventShortInfoDto> getEventsContaining(String title, String time) {
+        List<EventShortInfoDto> eventsList = new ArrayList<>();
+
+        if (time.equals("future")) {
+            eventsList.addAll(eventRepository.findByTitleContainingAndStartDateAfter(title, now, Sort.by("startDate").ascending())
+                    .stream()
+                    .map(event -> new EventShortInfoDto(
+                            event.getId(),
+                            event.getTitle(),
+                            event.getStartDate(),
+                            event.getEndDate(),
+                            event.getDescription()
+                    ))
+                    .collect(Collectors.toList()));
+        } else if (time.equals("currentAndFuture")) {
+            eventsList.addAll(eventRepository.findByTitleContainingAndEndDateAfter(title, now, Sort.by("startDate").ascending())
+                    .stream()
+                    .map(event -> new EventShortInfoDto(
+                            event.getId(),
+                            event.getTitle(),
+                            event.getStartDate(),
+                            event.getEndDate(),
+                            event.getDescription()
+                    ))
+                    .collect(Collectors.toList()));
+        } else {
+            eventsList.addAll(eventRepository.findByTitleContaining(title, Sort.by("startDate").ascending())
+                    .stream()
+                    .map(event -> new EventShortInfoDto(
+                            event.getId(),
+                            event.getTitle(),
+                            event.getStartDate(),
+                            event.getEndDate(),
+                            event.getDescription()
+                    ))
+                    .collect(Collectors.toList()));
+        }
+        return eventsList;
+    }
+
+    public EventInfoDto getSingleEventInfo(Long eventId) {
+        return eventRepository.findById(eventId)
+                .map(event -> new EventInfoDto(
+                        event.getId(),
+                        event.getTitle(),
+                        event.getStartDate(),
+                        event.getEndDate(),
+                        event.getDescription()
+                )).orElseThrow(() -> new EventDoesntExistException(eventId));
     }
 }

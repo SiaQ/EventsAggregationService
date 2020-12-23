@@ -8,14 +8,15 @@
 
 <div th:include="navbar.html"></div>
 
-<h1 class="text-center">Current and future events</h1>
+<h1 class="text-center">Found events</h1>
 <hr>
 <div class="container" style="width: 1000px">
-    <div th:each="event : ${events}" class="card m-3" style="width: 18rem; display: inline-block">
+    <div th:each="event : ${foundEvents}" class="card m-3" style="width: 18rem; display: inline-block">
         <div class="card-body">
-            <h5 class="card-title"><a th:href="@{events/{eventId}(eventId=${event.id})}" th:text="${event.title}">Event title</a></h5>
+            <h5 class="card-title" th:text="${event.title}"></h5>
             <h6 class="card-subtitle mb-2 text-muted" th:text="${event.startDate + ' to ' + event.endDate}"></h6>
             <p class="card-text" th:text="${#strings.abbreviate(event.shortDescription, 53)}"></p>
+            <a href="#" class="card-link">Edit</a>
         </div>
     </div>
 </div>

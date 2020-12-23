@@ -3,9 +3,7 @@ package pl.jg.eas.controllers;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import pl.jg.eas.dtos.NewEventForm;
 import pl.jg.eas.services.EventService;
 import pl.jg.eas.services.UserContextService;
@@ -47,5 +45,26 @@ public class EventController {
         eventService.addEvent(newEventForm);
 
         return "eventAddedView";
+    }
+
+    @GetMapping("/search-events")
+    public String searchEvents(
+            @RequestParam String title,
+            @RequestParam String time,
+            Model model
+    ) {
+        model.addAttribute("foundEvents", eventService.getEventsContaining(title, time));
+
+        return "foundEventsView";
+    }
+
+    @GetMapping("/events/{eventId}")
+    public String getSingleEventInfo(
+            @PathVariable Long eventId,
+            Model model
+    ) {
+        model.addAttribute("event", eventService.getSingleEventInfo(eventId));
+
+        return "singleEventView";
     }
 }

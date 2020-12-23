@@ -11,10 +11,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 @Setter
-public class EventShortInfoDto {
+public class EventInfoDto {
     private Long id;
     private String title;
     private LocalDate startDate;
     private LocalDate endDate;
-    private String shortDescription;
+    private String description;
 }

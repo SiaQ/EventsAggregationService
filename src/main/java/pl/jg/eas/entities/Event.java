@@ -35,6 +35,10 @@ public class Event {
     @JoinTable(name = "users_events")
     private User user;
 
+    public long getId() {
+        return id;
+    }
+
     public String getTitle() {
         return title;
     }
