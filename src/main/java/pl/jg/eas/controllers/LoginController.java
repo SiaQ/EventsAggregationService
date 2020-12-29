@@ -10,11 +10,11 @@ public class LoginController {
 
     @GetMapping("/user-login")
     public String showLoginForm() {
-        return "userLoginForm";
+        return "user/userLoginForm";
     }
 
     @GetMapping("/user-login-error")
     public String invalidCredentials() {
-        return "invalidCredentials";
+        return "user/invalidCredentials";
     }
 }

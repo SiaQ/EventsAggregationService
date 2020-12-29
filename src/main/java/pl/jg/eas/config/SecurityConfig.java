@@ -23,6 +23,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                     .antMatchers("/add-event").hasAuthority("ROLE_COMMON_USER")
+                    .antMatchers("/options").authenticated()
+                    .antMatchers("/events/*/edit").hasAnyAuthority("ROLE_EVENT_MANAGER", "ROLE_ADMIN")
                     .anyRequest().permitAll()
                 .and()
                     .formLogin()

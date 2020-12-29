@@ -54,4 +54,8 @@ public class Event {
     public String getDescription() {
         return description;
     }
+
+    public User getUser() {
+        return user;
+    }
 }

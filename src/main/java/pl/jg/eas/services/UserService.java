@@ -4,10 +4,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.jg.eas.dao.RoleRepository;
 import pl.jg.eas.dao.UserRepository;
+import pl.jg.eas.dtos.EditUserForm;
 import pl.jg.eas.dtos.NewUserForm;
 import pl.jg.eas.entities.Role;
 import pl.jg.eas.entities.User;
 import pl.jg.eas.exceptions.RoleDoesntExistException;
+import pl.jg.eas.exceptions.UserDoesntExistException;
 import pl.jg.eas.exceptions.UserWithSuchEmailExistsException;
 
 @Service
@@ -40,5 +42,14 @@ public class UserService {
 
             userRepository.save(user);
         }
+    }
+
+    public void editUser(EditUserForm editUserForm, String currentlyLoggedUser) {
+        final User user = userRepository.findUserByEmail(currentlyLoggedUser).orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
+
+        user.setNickname(editUserForm.getNickname());
+        user.setPassword(passwordEncoder.encode(editUserForm.getPassword()));
+
+        userRepository.save(user);
     }
 }

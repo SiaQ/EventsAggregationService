@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class NewEventForm {
+public class EditEventForm {
 
     @NotBlank(message = "Cannot be empty")
     private String title;
@@ -29,7 +29,7 @@ public class NewEventForm {
 
     @Override
     public String toString() {
-        return "NewEventForm{" +
+        return "EditEventForm{" +
                 "title='" + title + '\'' +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +

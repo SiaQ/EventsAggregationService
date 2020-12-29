@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${'EAS - ' + event.title}">EAS - single event</title>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div th:include="navbar.html"></div>
+
+<div class="jumbotron">
+    <h1 class="display-4" th:text="${event.title}">Event title</h1>
+    <p class="lead" th:text="${event.startDate + ' to ' + event.endDate}">Event date</p>
+    <hr class="my-4">
+    <p th:text="${event.description}"></p>
+    <div th:if="${!isOwnerOrAdmin}">
+        <span class="d-inline-block" data-toggle="popover" data-content="You are not owner or admin!">
+            <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Edit</button>
+        </span>
+    </div>
+    <div th:if="${isOwnerOrAdmin}">
+        <a class="btn btn-primary" th:href="@{{eventId}/edit(eventId=${event.id})}" role="button"
+           th:if="${isOwnerOrAdmin}">Edit</a>
+    </div>
+</div>
+
+<hr>
+
+<div>
+    <form th:action="@{/events/{eventId}/comment/add(eventId=${event.id})}" th:object="${newCommentForm}" method="post"
+          style="width: 500px; margin-left: 30px">
+        <h1>Add comment</h1>
+        <div th:if="${loggedAs == null}">
+            <div class="mb-3">
+                <label class="form-label">Comment</label>
+                <input type="text" th:field="*{comment}" class="form-control" placeholder="Enter comment text..."
+                       disabled>
+                <span th:errors="*{comment}"></span>
+            </div>
+            <span class="d-inline-block" data-toggle="popover" data-content="You are not logged!">
+            <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Not logged</button>
+        </span>
+        </div>
+        <div th:if="${loggedAs != null}">
+            <div class="mb-3">
+                <label class="form-label">Comment</label>
+                <input type="text" th:field="*{comment}" class="form-control" placeholder="Enter comment text...">
+                <span th:errors="*{comment}"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Add comment</button>
+        </div>
+    </form>
+</div>
+
+<hr>
+
+<div style="width: 500px; margin-left: 30px">
+    <h1>Comments</h1>
+    <div class="list-group" th:each="comment : ${event.comments}">
+        <div class="list-group-item">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1" th:text="${comment.nickname}">Nickname</h5>
+                <small th:text="${#temporals.format(comment.added, 'yyyy-MM-dd HH:mm')}">Added</small>
+            </div>
+            <p class="mb-1" th:text="${comment.text}">Text</p>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

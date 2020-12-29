@@ -2,12 +2,12 @@ package pl.jg.eas.services;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.jg.eas.dao.CommentRepository;
 import pl.jg.eas.dao.EventRepository;
 import pl.jg.eas.dao.RoleRepository;
 import pl.jg.eas.dao.UserRepository;
-import pl.jg.eas.dtos.EventShortInfoDto;
-import pl.jg.eas.dtos.NewEventForm;
-import pl.jg.eas.dtos.EventInfoDto;
+import pl.jg.eas.dtos.*;
+import pl.jg.eas.entities.Comment;
 import pl.jg.eas.entities.Event;
 import pl.jg.eas.entities.Role;
 import pl.jg.eas.entities.User;
@@ -18,6 +18,8 @@ import pl.jg.eas.exceptions.UserDoesntExistException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,12 +31,14 @@ public class EventService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final RoleRepository roleRepository;
+    private final CommentRepository commentRepository;
 
-    public EventService(UserContextService userContextService, UserRepository userRepository, EventRepository eventRepository, RoleRepository roleRepository) {
+    public EventService(UserContextService userContextService, UserRepository userRepository, EventRepository eventRepository, RoleRepository roleRepository, CommentRepository commentRepository) {
         this.userContextService = userContextService;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.roleRepository = roleRepository;
+        this.commentRepository = commentRepository;
     }
 
     private final LocalDate now = LocalDate.now();
@@ -117,14 +121,76 @@ public class EventService {
         return eventsList;
     }
 
-    public EventInfoDto getSingleEventInfo(Long eventId) {
-        return eventRepository.findById(eventId)
-                .map(event -> new EventInfoDto(
-                        event.getId(),
+    public Optional<EventInfoDto> getSingleEventInfo(Long eventId) {
+        final Optional<EventInfoDto> eventInfoDtoOptional = eventRepository.findById(eventId)
+                .map(event -> new EventInfoDto(event.getId(),
                         event.getTitle(),
                         event.getStartDate(),
                         event.getEndDate(),
-                        event.getDescription()
-                )).orElseThrow(() -> new EventDoesntExistException(eventId));
+                        event.getDescription()));
+
+        eventInfoDtoOptional.ifPresent(eventInfoDto -> {
+            final List<CommentDto> commentDtos = commentRepository
+                    .findByEventId(eventId, Sort.by("added").descending())
+                    .stream()
+                    .map(comment -> new CommentDto(comment.getCommentatorEmail(),
+                            comment.getAdded(),
+                            comment.getCommentText()))
+                    .collect(Collectors.toList());
+
+            eventInfoDto.setComments(commentDtos);
+        });
+
+        return eventInfoDtoOptional;
+    }
+
+    public void editEvent(EditEventForm editEventForm, Long eventId) {
+
+        final Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventDoesntExistException(eventId));
+
+        event.setTitle(editEventForm.getTitle());
+        event.setStartDate(editEventForm.getStartDate());
+        event.setEndDate(editEventForm.getEndDate());
+        event.setDescription(editEventForm.getDescription());
+
+        eventRepository.save(event);
+    }
+
+    public boolean isOwnerOrAdmin(String currentlyLoggedUser, Long eventId) {
+        boolean isOwnerOrAdmin = false;
+
+        final Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventDoesntExistException(eventId));
+
+        if (currentlyLoggedUser != null) {
+            final Set<Role> roles = userRepository.findUserByEmail(currentlyLoggedUser)
+                    .orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser))
+                    .getRoles();
+
+            for (Role role : roles) {
+                if (role.getRoleName().equals("ROLE_ADMIN")) {
+                    isOwnerOrAdmin = true;
+                    break;
+                }
+            }
+        }
+
+        if (event.getUser().getEmail().equals(currentlyLoggedUser)) {
+            isOwnerOrAdmin = true;
+        }
+
+        return isOwnerOrAdmin;
+    }
+
+    public void addNewComment(Long eventId, NewCommentForm newCommentForm, String email) {
+        final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
+
+        final Comment comment = new Comment();
+        comment.setCommentatorEmail(email);
+        comment.setCommentText(newCommentForm.getComment());
+        comment.setEvent(event);
+
+        commentRepository.save(comment);
     }
 }
