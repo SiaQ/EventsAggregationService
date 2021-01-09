@@ -34,10 +34,6 @@ public class User {
     @JoinTable(name = "users_roles")
     private Set<Role> roles = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_signed_events")
-    private List<Event> signedUpForEvents = new ArrayList<>();
-
     public User(String email, String password, String nickname) {
         this.email = email;
         this.password = password;
@@ -52,13 +48,5 @@ public class User {
     }
     public Set<Role> getRoles() {
         return roles;
-    }
-
-    public void signUp(Event event) {
-        signedUpForEvents.add(event);
-    }
-
-    public List<Event> getSignedUpForEvents() {
-        return signedUpForEvents;
     }
 }

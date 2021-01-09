@@ -8,6 +8,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @AllArgsConstructor
@@ -34,6 +36,22 @@ public class Event {
     @ManyToOne
     @JoinTable(name = "users_events")
     private User user;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_signed_events")
+    private List<User> signedUpForEvents = new ArrayList<>();
+
+    public void signUp(User user) {
+        signedUpForEvents.add(user);
+    }
+
+    public void signOff(User user) {
+        signedUpForEvents.remove(user);
+    }
+
+    public List<User> getSignedUpForEvents() {
+        return signedUpForEvents;
+    }
 
     public long getId() {
         return id;

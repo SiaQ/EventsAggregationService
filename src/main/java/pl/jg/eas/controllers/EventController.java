@@ -158,4 +158,15 @@ public class EventController {
 
         return "redirect:/events/" + eventId;
     }
+
+    @PostMapping("/events/{eventId}/sign-off")
+    public String signOffFromEvent(
+            @PathVariable Long eventId,
+            Model model
+    ) {
+        model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+        eventService.signOff(eventId, userContextService.getCurrentlyLoggedUserEmail());
+
+        return "redirect:/events/" + eventId;
+    }
 }

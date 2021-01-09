@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
 @Service
 public class EventService {
 
-    //dodatkowo, bo pododaniu tego eventu uzytkownik otrzumuje nowa role ROLE_EVENT_MANAGER albo cos w podobie
-
     private final UserContextService userContextService;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
@@ -198,24 +196,30 @@ public class EventService {
         final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
         final User user = userRepository.findUserByEmail(currentlyLoggedUser).orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
 
-        user.signUp(event);
+        event.signUp(user);
 
-        userRepository.save(user);
+        eventRepository.save(event);
+    }
+
+    public void signOff(Long eventId, String currentlyLoggedUser) {
+        final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
+        final User user = userRepository.findUserByEmail(currentlyLoggedUser).orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
+
+        event.signOff(user);
+
+        eventRepository.save(event);
     }
 
     public boolean isSignedUp(Long eventId, String currentlyLoggedUser) {
         boolean isSignedUp = false;
 
-        final Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EventDoesntExistException(eventId));
-
         if (currentlyLoggedUser != null) {
-            final List<Event> events = userRepository.findUserByEmail(currentlyLoggedUser)
-                    .orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser))
+            final List<User> signedUpForEvents = eventRepository.findById(eventId)
+                    .orElseThrow(() -> new EventDoesntExistException(eventId))
                     .getSignedUpForEvents();
 
-            for (Event e : events) {
-                if (e.getId() == eventId) {
+            for (User user : signedUpForEvents) {
+                if (user.getEmail().equals(currentlyLoggedUser)) {
                     isSignedUp = true;
                     break;
                 }

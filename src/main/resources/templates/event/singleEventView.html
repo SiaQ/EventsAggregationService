@@ -35,6 +35,11 @@
             <span class="d-inline-block" data-toggle="tooltip" title="You are already signed up for this event!">
                 <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Signed up!</button>
             </span>
+            <span>
+                <form th:action="@{{eventId}/sign-off(eventId=${event.id})}" method="post">
+                    <button class="btn btn-primary" type="submit">Sign off!</button>
+                </form>
+            </span>
         </div>
         <div th:if="${!isSignedUpFor}">
             <form th:action="@{{eventId}/sign-up(eventId=${event.id})}" method="post">
