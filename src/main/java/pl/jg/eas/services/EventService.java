@@ -15,6 +15,7 @@ import pl.jg.eas.exceptions.EventDoesntExistException;
 import pl.jg.eas.exceptions.RoleDoesntExistException;
 import pl.jg.eas.exceptions.UserDoesntExistException;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -201,6 +202,7 @@ public class EventService {
         eventRepository.save(event);
     }
 
+    @Transactional
     public void signOff(Long eventId, String currentlyLoggedUser) {
         final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
         final User user = userRepository.findUserByEmail(currentlyLoggedUser).orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
@@ -214,7 +216,7 @@ public class EventService {
         boolean isSignedUp = false;
 
         if (currentlyLoggedUser != null) {
-            final List<User> signedUpForEvents = eventRepository.findById(eventId)
+            final Set<User> signedUpForEvents = eventRepository.findById(eventId)
                     .orElseThrow(() -> new EventDoesntExistException(eventId))
                     .getSignedUpForEvents();
 
@@ -227,5 +229,10 @@ public class EventService {
         }
 
         return isSignedUp;
+    }
+
+    public Set<User> getSignedUpUsers(Long eventId) {
+        final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
+        return event.getSignedUpForEvents();
     }
 }

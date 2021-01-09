@@ -7,9 +7,12 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Setter
 @AllArgsConstructor
@@ -39,7 +42,7 @@ public class Event {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_signed_events")
-    private List<User> signedUpForEvents = new ArrayList<>();
+    private Set<User> signedUpForEvents = new HashSet<>();
 
     public void signUp(User user) {
         signedUpForEvents.add(user);
@@ -49,7 +52,7 @@ public class Event {
         signedUpForEvents.remove(user);
     }
 
-    public List<User> getSignedUpForEvents() {
+    public Set<User> getSignedUpForEvents() {
         return signedUpForEvents;
     }
 

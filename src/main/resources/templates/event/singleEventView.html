@@ -16,37 +16,39 @@
     <p class="lead" th:text="${event.startDate + ' to ' + event.endDate}">Event date</p>
     <hr class="my-4">
     <p th:text="${event.description}"></p>
-    <span th:if="${!isOwnerOrAdmin}">
-        <span class="d-inline-block" data-toggle="tooltip" title="You are not owner or admin!">
-            <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Edit</button>
-        </span>
+    <span th:if="${!isOwnerOrAdmin}" class="d-inline-block" data-toggle="tooltip" title="You are not owner or admin!">
+        <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Edit</button>
     </span>
-    <span th:if="${isOwnerOrAdmin}">
+    <span th:if="${loggedAs == null}" class="d-inline-block" data-toggle="tooltip" title="You are not logged!">
+        <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Sign up</button>
+    </span>
+    <span th:if="${isOwnerOrAdmin}" class="d-inline-block">
         <a class="btn btn-primary" th:href="@{{eventId}/edit(eventId=${event.id})}" role="button"
            th:if="${isOwnerOrAdmin}">Edit</a>
     </span>
-    <span th:if="${loggedAs == null}">
-        <span class="d-inline-block" data-toggle="tooltip" title="You are not logged!">
-            <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Sign up</button>
-        </span>
-    </span>
     <span th:if="${loggedAs != null}">
-        <div th:if="${isSignedUpFor}">
-            <span class="d-inline-block" data-toggle="tooltip" title="You are already signed up for this event!">
-                <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Signed up!</button>
-            </span>
-            <span>
+        <span th:if="${!isSignedUpFor}" class="d-inline-block">
+            <form th:action="@{{eventId}/sign-up(eventId=${event.id})}" method="post">
+                <button class="btn btn-primary" type="submit">Sign up!</button>
+            </form>
+        </span>
+        <span th:if="${isSignedUpFor}" class="d-inline-block" data-toggle="tooltip" title="You are already signed up for this event!">
+            <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Signed up!</button>
+            <span class="d-inline-block">
                 <form th:action="@{{eventId}/sign-off(eventId=${event.id})}" method="post">
                     <button class="btn btn-primary" type="submit">Sign off!</button>
                 </form>
             </span>
-        </div>
-        <div th:if="${!isSignedUpFor}">
-            <form th:action="@{{eventId}/sign-up(eventId=${event.id})}" method="post">
-                <button class="btn btn-primary" type="submit">Sign up!</button>
-            </form>
-        </div>
+        </span>
     </span>
+    <div class="dropdown" style="margin-top: 5px">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+            Signed up users
+        </button>
+        <div class="dropdown-menu" th:each="user : ${usersSignedUpFor}">
+            <p class="dropdown-item-text" th:text="${user.email}"></p>
+        </div>
+    </div>
 </div>
 
 <hr>
