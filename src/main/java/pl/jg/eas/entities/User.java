@@ -5,7 +5,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -32,9 +34,9 @@ public class User {
     @JoinTable(name = "users_roles")
     private Set<Role> roles = new HashSet<>();
 
-    public void addRole(Role role) {
-        roles.add(role);
-    }
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_signed_events")
+    private List<Event> signedUpForEvents = new ArrayList<>();
 
     public User(String email, String password, String nickname) {
         this.email = email;
@@ -45,7 +47,18 @@ public class User {
     public User() {
     }
 
+    public void addRole(Role role) {
+        roles.add(role);
+    }
     public Set<Role> getRoles() {
         return roles;
+    }
+
+    public void signUp(Event event) {
+        signedUpForEvents.add(event);
+    }
+
+    public List<Event> getSignedUpForEvents() {
+        return signedUpForEvents;
     }
 }

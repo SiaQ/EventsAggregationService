@@ -157,7 +157,7 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    public boolean isOwnerOrAdmin(String currentlyLoggedUser, Long eventId) {
+    public boolean isOwnerOrAdmin(Long eventId, String currentlyLoggedUser) {
         boolean isOwnerOrAdmin = false;
 
         final Event event = eventRepository.findById(eventId)
@@ -183,14 +183,45 @@ public class EventService {
         return isOwnerOrAdmin;
     }
 
-    public void addNewComment(Long eventId, NewCommentForm newCommentForm, String email) {
+    public void addNewComment(Long eventId, NewCommentForm newCommentForm, String currentlyLoggedUser) {
         final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
 
         final Comment comment = new Comment();
-        comment.setCommentatorEmail(email);
+        comment.setCommentatorEmail(currentlyLoggedUser);
         comment.setCommentText(newCommentForm.getComment());
         comment.setEvent(event);
 
         commentRepository.save(comment);
+    }
+
+    public void signUp(Long eventId, String currentlyLoggedUser) {
+        final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
+        final User user = userRepository.findUserByEmail(currentlyLoggedUser).orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
+
+        user.signUp(event);
+
+        userRepository.save(user);
+    }
+
+    public boolean isSignedUp(Long eventId, String currentlyLoggedUser) {
+        boolean isSignedUp = false;
+
+        final Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventDoesntExistException(eventId));
+
+        if (currentlyLoggedUser != null) {
+            final List<Event> events = userRepository.findUserByEmail(currentlyLoggedUser)
+                    .orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser))
+                    .getSignedUpForEvents();
+
+            for (Event e : events) {
+                if (e.getId() == eventId) {
+                    isSignedUp = true;
+                    break;
+                }
+            }
+        }
+
+        return isSignedUp;
     }
 }

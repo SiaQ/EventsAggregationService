@@ -16,15 +16,32 @@
     <p class="lead" th:text="${event.startDate + ' to ' + event.endDate}">Event date</p>
     <hr class="my-4">
     <p th:text="${event.description}"></p>
-    <div th:if="${!isOwnerOrAdmin}">
-        <span class="d-inline-block" data-toggle="popover" data-content="You are not owner or admin!">
+    <span th:if="${!isOwnerOrAdmin}">
+        <span class="d-inline-block" data-toggle="tooltip" title="You are not owner or admin!">
             <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Edit</button>
         </span>
-    </div>
-    <div th:if="${isOwnerOrAdmin}">
+    </span>
+    <span th:if="${isOwnerOrAdmin}">
         <a class="btn btn-primary" th:href="@{{eventId}/edit(eventId=${event.id})}" role="button"
            th:if="${isOwnerOrAdmin}">Edit</a>
-    </div>
+    </span>
+    <span th:if="${loggedAs == null}">
+        <span class="d-inline-block" data-toggle="tooltip" title="You are not logged!">
+            <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Sign up</button>
+        </span>
+    </span>
+    <span th:if="${loggedAs != null}">
+        <div th:if="${isSignedUpFor}">
+            <span class="d-inline-block" data-toggle="tooltip" title="You are already signed up for this event!">
+                <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Signed up!</button>
+            </span>
+        </div>
+        <div th:if="${!isSignedUpFor}">
+            <form th:action="@{{eventId}/sign-up(eventId=${event.id})}" method="post">
+                <button class="btn btn-primary" type="submit">Sign up!</button>
+            </form>
+        </div>
+    </span>
 </div>
 
 <hr>
@@ -40,9 +57,9 @@
                        disabled>
                 <span th:errors="*{comment}"></span>
             </div>
-            <span class="d-inline-block" data-toggle="popover" data-content="You are not logged!">
-            <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Not logged</button>
-        </span>
+            <span class="d-inline-block" data-toggle="tooltip" title="You are not logged!">
+                <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Add comment</button>
+            </span>
         </div>
         <div th:if="${loggedAs != null}">
             <div class="mb-3">
