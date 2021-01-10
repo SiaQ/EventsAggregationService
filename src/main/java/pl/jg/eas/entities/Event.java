@@ -21,14 +21,14 @@ public class Event {
     @Column(name = "event_id")
     private Long id;
 
-    @Column(length = 100)
+    @Column(length = 100, nullable = false)
     private String title;
 
     private LocalDate startDate;
 
     private LocalDate endDate;
 
-    @Column(length = 2000)
+    @Column(length = 2000, nullable = false)
     private String description;
 
     @ManyToOne

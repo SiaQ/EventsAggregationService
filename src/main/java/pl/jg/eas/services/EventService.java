@@ -69,13 +69,7 @@ public class EventService {
     public List<EventShortInfoDto> getCurrentAndFutureEvents() {
         return eventRepository.findByEndDateAfter(now, startDate)
                 .stream()
-                .map(event -> new EventShortInfoDto(
-                        event.getId(),
-                        event.getTitle(),
-                        event.getStartDate(),
-                        event.getEndDate(),
-                        event.getDescription()
-                ))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
@@ -85,38 +79,30 @@ public class EventService {
         if (time.equals("future")) {
             eventsList.addAll(eventRepository.findByTitleContainingAndStartDateAfter(title, now, startDate)
                     .stream()
-                    .map(event -> new EventShortInfoDto(
-                            event.getId(),
-                            event.getTitle(),
-                            event.getStartDate(),
-                            event.getEndDate(),
-                            event.getDescription()
-                    ))
+                    .map(this::convertToDto)
                     .collect(Collectors.toList()));
         } else if (time.equals("currentAndFuture")) {
             eventsList.addAll(eventRepository.findByTitleContainingAndEndDateAfter(title, now, startDate)
                     .stream()
-                    .map(event -> new EventShortInfoDto(
-                            event.getId(),
-                            event.getTitle(),
-                            event.getStartDate(),
-                            event.getEndDate(),
-                            event.getDescription()
-                    ))
+                    .map(this::convertToDto)
                     .collect(Collectors.toList()));
         } else {
             eventsList.addAll(eventRepository.findByTitleContaining(title, startDate)
                     .stream()
-                    .map(event -> new EventShortInfoDto(
-                            event.getId(),
-                            event.getTitle(),
-                            event.getStartDate(),
-                            event.getEndDate(),
-                            event.getDescription()
-                    ))
+                    .map(this::convertToDto)
                     .collect(Collectors.toList()));
         }
         return eventsList;
+    }
+
+    private EventShortInfoDto convertToDto(Event event) {
+        return new EventShortInfoDto(
+                event.getId(),
+                event.getTitle(),
+                event.getStartDate(),
+                event.getEndDate(),
+                event.getDescription()
+        );
     }
 
     public Optional<EventInfoDto> getSingleEventInfo(Long eventId) {
@@ -239,11 +225,7 @@ public class EventService {
     public List<EventShortInfoDto> getUserOwnerEvents(String currentlyLoggedUserEmail) {
         return eventRepository.findByUserEmail(currentlyLoggedUserEmail, startDate)
                 .stream()
-                .map(event -> new EventShortInfoDto(event.getId(),
-                        event.getTitle(),
-                        event.getStartDate(),
-                        event.getEndDate(),
-                        event.getDescription()))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
