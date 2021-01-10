@@ -25,6 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers("/add-event").hasAuthority("ROLE_COMMON_USER")
                     .antMatchers("/options").authenticated()
                     .antMatchers("/events/*/edit").hasAnyAuthority("ROLE_EVENT_MANAGER", "ROLE_ADMIN")
+                    .antMatchers("/events/*/sign-up").hasAuthority("ROLE_COMMON_USER")
                     .anyRequest().permitAll()
                 .and()
                     .formLogin()

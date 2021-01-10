@@ -43,12 +43,12 @@ public class EventController {
             BindingResult bindingResult,
             Model model
     ) {
-        if(bindingResult.hasErrors()) {
-            model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
+        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
+
+        if (bindingResult.hasErrors()) {
             return "event/addEventForm";
         }
 
-        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         eventService.addEvent(newEventForm);
 
         return "event/eventAddedView";
@@ -81,11 +81,6 @@ public class EventController {
 
         final Optional<EventInfoDto> singleEventInfo = eventService.getSingleEventInfo(eventId);
 
-        if(singleEventInfo.isEmpty()) {
-            model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
-            return "event/eventDoesntExist";
-        }
-
         model.addAttribute("event", singleEventInfo.get());
 
         return "event/singleEventView";
@@ -103,8 +98,7 @@ public class EventController {
 
         final Optional<EventInfoDto> singleEventInfo = eventService.getSingleEventInfo(eventId);
 
-        if(singleEventInfo.isEmpty()) {
-            model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
+        if (singleEventInfo.isEmpty()) {
             return "event/eventDoesntExist";
         }
 
@@ -120,13 +114,12 @@ public class EventController {
             BindingResult bindingResult,
             Model model
     ) {
+        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
 
-        if(bindingResult.hasErrors()) {
-            model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
+        if (bindingResult.hasErrors()) {
             return "event/editEventForm";
         }
 
-        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         eventService.editEvent(editEventForm, eventId);
 
         return redirectEvents + eventId;
@@ -138,9 +131,9 @@ public class EventController {
             @ModelAttribute @Valid NewCommentForm newCommentForm,
             BindingResult bindingResult,
             Model model
-            ) {
+    ) {
 
-        if(bindingResult.hasErrors()) {
+        if (bindingResult.hasErrors()) {
             model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
             return redirectEvents + eventId;
         }

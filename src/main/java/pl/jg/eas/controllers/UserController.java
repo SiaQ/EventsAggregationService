@@ -20,6 +20,7 @@ public class UserController {
     private final UserService userService;
     private final UserContextService userContextService;
     private final EventService eventService;
+    private final String loggedAs = "loggedAs";
 
     public UserController(UserService userService, UserContextService userContextService, EventService eventService) {
         this.userService = userService;
@@ -55,7 +56,7 @@ public class UserController {
     public String editUserForm(Model model) {
         final EditUserForm editUserForm = new EditUserForm();
 
-        model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         model.addAttribute("editUserForm", editUserForm);
 
         return "user/userOptionsView";
@@ -80,7 +81,7 @@ public class UserController {
             Model model
     ) {
         final String currentlyLoggedUserEmail = userContextService.getCurrentlyLoggedUserEmail();
-        model.addAttribute("loggedAs", currentlyLoggedUserEmail);
+        model.addAttribute(loggedAs, currentlyLoggedUserEmail);
         model.addAttribute("userOwnerEvents", eventService.getUserOwnerEvents(currentlyLoggedUserEmail));
 //        model.addAttribute("userSignedUpForEvents", eventService.getUserSignedUpForEvents(currentlyLoggedUserEmail));
 

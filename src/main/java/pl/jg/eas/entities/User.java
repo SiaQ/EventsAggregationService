@@ -3,7 +3,6 @@ package pl.jg.eas.entities;
 import lombok.Getter;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,6 +31,7 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles")
     private Set<Role> roles = new HashSet<>();
+
 
     public User(String email, String password, String nickname) {
         this.email = email;

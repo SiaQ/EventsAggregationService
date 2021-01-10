@@ -231,8 +231,9 @@ public class EventService {
     }
 
     public Set<User> getSignedUpUsers(Long eventId) {
-        final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
-        return event.getSignedUpForEvents();
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventDoesntExistException(eventId))
+                .getSignedUpForEvents();
     }
 
     public List<EventShortInfoDto> getUserOwnerEvents(String currentlyLoggedUserEmail) {

@@ -51,7 +51,7 @@ public class Event {
         return signedUpForEvents;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
