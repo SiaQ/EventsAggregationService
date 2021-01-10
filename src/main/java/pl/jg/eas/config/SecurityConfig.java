@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    public static final String ROLE_EVENT_MANAGER = "ROLE_EVENT_MANAGER";
     @Autowired
     private DataSource dataSource;
 
@@ -22,11 +23,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                    .antMatchers("/add-event").hasAuthority("ROLE_COMMON_USER")
+                    .antMatchers("/add-event").hasAuthority(ROLE_EVENT_MANAGER)
                     .antMatchers("/options").authenticated()
-                    .antMatchers("/events/*/edit").hasAnyAuthority("ROLE_EVENT_MANAGER", "ROLE_ADMIN")
+                    .antMatchers("/events/*/edit").hasAnyAuthority(ROLE_EVENT_MANAGER, "ROLE_ADMIN")
                     .antMatchers("/events/*/sign-up").hasAuthority("ROLE_COMMON_USER")
                     .anyRequest().permitAll()
+                .and()
+                    .exceptionHandling().accessDeniedPage("/not-allowed")
                 .and()
                     .formLogin()
                     .loginPage("/user-login")

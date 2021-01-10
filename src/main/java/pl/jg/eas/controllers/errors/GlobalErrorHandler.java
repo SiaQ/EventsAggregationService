@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import pl.jg.eas.exceptions.EventDoesntExistException;
+import pl.jg.eas.exceptions.UserDoesntExistException;
 import pl.jg.eas.exceptions.UserWithSuchEmailExistsException;
 import pl.jg.eas.services.UserContextService;
 
@@ -26,11 +27,23 @@ public class GlobalErrorHandler {
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(UserDoesntExistException.class)
+    private String handle(UserDoesntExistException e) {
+
+        return "user/userDoesntExist";
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(EventDoesntExistException.class)
     private String handle(EventDoesntExistException e, Model model) {
 
         model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
 
         return "event/eventDoesntExist";
+    }
+
+    @ExceptionHandler(Exception.class)
+    private String handle(Exception e) {
+        return "errors/unidentifiedException";
     }
 }

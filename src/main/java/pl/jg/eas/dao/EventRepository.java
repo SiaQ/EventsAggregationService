@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
-    List<Event> findByEndDateAfter(LocalDate date, Sort sort);
+    List<Event> findByEndDateGreaterThanEqual(LocalDate date, Sort sort);
     List<Event> findByTitleContaining(String title, Sort sort);
     List<Event> findByTitleContainingAndStartDateAfter(String title, LocalDate date, Sort sort);
-    List<Event> findByTitleContainingAndEndDateAfter(String title, LocalDate date, Sort sort);
+    List<Event> findByTitleContainingAndEndDateGreaterThanEqual(String title, LocalDate date, Sort sort);
     Optional<Event> findById(Long id);
     List<Event> findByUserEmail(String email, Sort sort);
 }

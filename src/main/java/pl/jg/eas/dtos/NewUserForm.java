@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 @Setter
 public class NewUserForm {
 
+    @NotBlank(message = "Email cannot be empty")
     @Email(message = "Incorrect email")
     private String email;
 

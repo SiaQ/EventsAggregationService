@@ -17,10 +17,10 @@ import java.util.Optional;
 @Controller
 public class EventController {
 
+    private static final String REDIRECT_EVENTS = "redirect:/events/";
+
     private final EventService eventService;
     private final UserContextService userContextService;
-    private static final String loggedAs = "loggedAs";
-    private static final String redirectEvents = "redirect:/events/";
 
     public EventController(EventService eventService, UserContextService userContextService) {
         this.eventService = eventService;
@@ -31,7 +31,6 @@ public class EventController {
     public String addEventForm(Model model) {
         final NewEventForm newEventForm = new NewEventForm();
 
-        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         model.addAttribute("newEventForm", newEventForm);
 
         return "event/addEventForm";
@@ -40,10 +39,8 @@ public class EventController {
     @PostMapping("/add-event")
     public String addEventSubmit(
             @ModelAttribute @Valid NewEventForm newEventForm,
-            BindingResult bindingResult,
-            Model model
+            BindingResult bindingResult
     ) {
-        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
 
         if (bindingResult.hasErrors()) {
             return "event/addEventForm";
@@ -60,7 +57,6 @@ public class EventController {
             @RequestParam String time,
             Model model
     ) {
-        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         model.addAttribute("foundEvents", eventService.getEventsContaining(title, time));
 
         return "event/foundEventsView";
@@ -73,7 +69,6 @@ public class EventController {
     ) {
         final String currentlyLoggedUser = userContextService.getCurrentlyLoggedUserEmail();
         final NewCommentForm newCommentForm = new NewCommentForm();
-        model.addAttribute(loggedAs, currentlyLoggedUser);
         model.addAttribute("isOwnerOrAdmin", eventService.isOwnerOrAdmin(eventId, currentlyLoggedUser));
         model.addAttribute("newCommentForm", newCommentForm);
         model.addAttribute("isSignedUpFor", eventService.isSignedUp(eventId, userContextService.getCurrentlyLoggedUserEmail()));
@@ -81,7 +76,7 @@ public class EventController {
 
         final Optional<EventInfoDto> singleEventInfo = eventService.getSingleEventInfo(eventId);
 
-        model.addAttribute("event", singleEventInfo.get());
+        singleEventInfo.ifPresent(eventInfoDto -> model.addAttribute("event", eventInfoDto));
 
         return "event/singleEventView";
     }
@@ -93,7 +88,6 @@ public class EventController {
     ) {
         final EditEventForm editEventForm = new EditEventForm();
 
-        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         model.addAttribute("editEventForm", editEventForm);
 
         final Optional<EventInfoDto> singleEventInfo = eventService.getSingleEventInfo(eventId);
@@ -111,10 +105,8 @@ public class EventController {
     public String editEventSubmit(
             @PathVariable Long eventId,
             @ModelAttribute @Valid EditEventForm editEventForm,
-            BindingResult bindingResult,
-            Model model
+            BindingResult bindingResult
     ) {
-        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
 
         if (bindingResult.hasErrors()) {
             return "event/editEventForm";
@@ -122,47 +114,40 @@ public class EventController {
 
         eventService.editEvent(editEventForm, eventId);
 
-        return redirectEvents + eventId;
+        return REDIRECT_EVENTS + eventId;
     }
 
     @PostMapping("/events/{eventId}/comment/add")
     public String addCommentToEventForm(
             @PathVariable Long eventId,
             @ModelAttribute @Valid NewCommentForm newCommentForm,
-            BindingResult bindingResult,
-            Model model
+            BindingResult bindingResult
     ) {
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
-            return redirectEvents + eventId;
+            return REDIRECT_EVENTS + eventId;
         }
 
-        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         eventService.addNewComment(eventId, newCommentForm, userContextService.getCurrentlyLoggedUserEmail());
 
-        return redirectEvents + eventId;
+        return REDIRECT_EVENTS + eventId;
     }
 
     @PostMapping("/events/{eventId}/sign-up")
     public String signUpForEvent(
-            @PathVariable Long eventId,
-            Model model
+            @PathVariable Long eventId
     ) {
-        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         eventService.signUp(eventId, userContextService.getCurrentlyLoggedUserEmail());
 
-        return redirectEvents + eventId;
+        return REDIRECT_EVENTS + eventId;
     }
 
     @PostMapping("/events/{eventId}/sign-off")
     public String signOffFromEvent(
-            @PathVariable Long eventId,
-            Model model
+            @PathVariable Long eventId
     ) {
-        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         eventService.signOff(eventId, userContextService.getCurrentlyLoggedUserEmail());
 
-        return redirectEvents + eventId;
+        return REDIRECT_EVENTS + eventId;
     }
 }

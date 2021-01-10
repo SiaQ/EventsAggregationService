@@ -4,7 +4,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import pl.jg.eas.dao.CommentRepository;
 import pl.jg.eas.dao.EventRepository;
-import pl.jg.eas.dao.RoleRepository;
 import pl.jg.eas.dao.UserRepository;
 import pl.jg.eas.dtos.*;
 import pl.jg.eas.entities.Comment;
@@ -12,6 +11,7 @@ import pl.jg.eas.entities.Event;
 import pl.jg.eas.entities.Role;
 import pl.jg.eas.entities.User;
 import pl.jg.eas.exceptions.EventDoesntExistException;
+import pl.jg.eas.exceptions.NotOwnerException;
 import pl.jg.eas.exceptions.UserDoesntExistException;
 
 import javax.transaction.Transactional;
@@ -25,31 +25,29 @@ import java.util.stream.Collectors;
 @Service
 public class EventService {
 
+    private static final Sort START_DATE = Sort.by("startDate").ascending();
+
     private final UserContextService userContextService;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
-    private final RoleRepository roleRepository;
     private final CommentRepository commentRepository;
-    private final Sort startDate = Sort.by("startDate").ascending();
-    private final LocalDate now = LocalDate.now();
 
-    public EventService(UserContextService userContextService, UserRepository userRepository, EventRepository eventRepository, RoleRepository roleRepository, CommentRepository commentRepository) {
+    public EventService(UserContextService userContextService,
+                        UserRepository userRepository,
+                        EventRepository eventRepository,
+                        CommentRepository commentRepository) {
         this.userContextService = userContextService;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
-        this.roleRepository = roleRepository;
         this.commentRepository = commentRepository;
     }
 
+    @Transactional
     public void addEvent(NewEventForm newEventForm) {
         final String currentlyLoggedUserEmail = userContextService.getCurrentlyLoggedUserEmail();
 
         final User user = userRepository.findUserByEmail(currentlyLoggedUserEmail)
                 .orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUserEmail));
-
-        final String roleName = "ROLE_EVENT_MANAGER";
-        final Role role = roleRepository.findRoleByRoleName(roleName)
-                .orElseGet(() -> roleRepository.save(new Role(roleName)));
 
         final Event event = new Event();
 
@@ -59,15 +57,11 @@ public class EventService {
         event.setDescription(newEventForm.getDescription());
         event.setUser(user);
 
-        if (!user.getRoles().contains(role)) {
-            user.addRole(role);
-            userRepository.save(user);
-        }
         eventRepository.save(event);
     }
 
     public List<EventShortInfoDto> getCurrentAndFutureEvents() {
-        return eventRepository.findByEndDateAfter(now, startDate)
+        return eventRepository.findByEndDateGreaterThanEqual(LocalDate.now(), START_DATE)
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
@@ -76,18 +70,18 @@ public class EventService {
     public List<EventShortInfoDto> getEventsContaining(String title, String time) {
         List<EventShortInfoDto> eventsList = new ArrayList<>();
 
-        if (time.equals("future")) {
-            eventsList.addAll(eventRepository.findByTitleContainingAndStartDateAfter(title, now, startDate)
+        if ("future".equals(time)) {
+            eventsList.addAll(eventRepository.findByTitleContainingAndStartDateAfter(title, LocalDate.now(), START_DATE)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList()));
         } else if (time.equals("currentAndFuture")) {
-            eventsList.addAll(eventRepository.findByTitleContainingAndEndDateAfter(title, now, startDate)
+            eventsList.addAll(eventRepository.findByTitleContainingAndEndDateGreaterThanEqual(title, LocalDate.now(), START_DATE)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList()));
         } else {
-            eventsList.addAll(eventRepository.findByTitleContaining(title, startDate)
+            eventsList.addAll(eventRepository.findByTitleContaining(title, START_DATE)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList()));
@@ -128,19 +122,6 @@ public class EventService {
         return eventInfoDtoOptional;
     }
 
-    public void editEvent(EditEventForm editEventForm, Long eventId) {
-
-        final Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EventDoesntExistException(eventId));
-
-        event.setTitle(editEventForm.getTitle());
-        event.setStartDate(editEventForm.getStartDate());
-        event.setEndDate(editEventForm.getEndDate());
-        event.setDescription(editEventForm.getDescription());
-
-        eventRepository.save(event);
-    }
-
     public boolean isOwnerOrAdmin(Long eventId, String currentlyLoggedUser) {
         boolean isOwnerOrAdmin = false;
 
@@ -165,6 +146,24 @@ public class EventService {
         }
 
         return isOwnerOrAdmin;
+    }
+
+    public void editEvent(EditEventForm editEventForm, Long eventId) {
+
+        final String currentlyLoggedUserEmail = userContextService.getCurrentlyLoggedUserEmail();
+        if (!isOwnerOrAdmin(eventId, currentlyLoggedUserEmail)) {
+            throw new NotOwnerException(currentlyLoggedUserEmail);
+        }
+
+        final Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventDoesntExistException(eventId));
+
+        event.setTitle(editEventForm.getTitle());
+        event.setStartDate(editEventForm.getStartDate());
+        event.setEndDate(editEventForm.getEndDate());
+        event.setDescription(editEventForm.getDescription());
+
+        eventRepository.save(event);
     }
 
     public void addNewComment(Long eventId, NewCommentForm newCommentForm, String currentlyLoggedUser) {
@@ -223,13 +222,9 @@ public class EventService {
     }
 
     public List<EventShortInfoDto> getUserOwnerEvents(String currentlyLoggedUserEmail) {
-        return eventRepository.findByUserEmail(currentlyLoggedUserEmail, startDate)
+        return eventRepository.findByUserEmail(currentlyLoggedUserEmail, START_DATE)
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
-
-//    public List<EventShortInfoDto> getUserSignedUpForEvents(String currentlyLoggedUserEmail) {
-//
-//    }
 }
