@@ -1,17 +1,14 @@
 package pl.jg.eas.entities;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
-@Setter
 @Entity
 @Table(name = "users")
 public class User {
@@ -19,13 +16,15 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private long id;
+    private Long id;
 
     @Column(unique = true)
     private String email;
 
+    @Column(length = 30)
     private String password;
 
+    @Column(length = 50)
     private String nickname;
 
     private LocalDateTime created = LocalDateTime.now();
@@ -46,7 +45,24 @@ public class User {
     public void addRole(Role role) {
         roles.add(role);
     }
-    public Set<Role> getRoles() {
-        return roles;
+
+    public void removeRole(Role role) {
+        roles.remove(role);
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setCreated(LocalDateTime created) {
+        this.created = created;
     }
 }

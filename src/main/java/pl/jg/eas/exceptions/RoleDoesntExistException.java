@@ -2,7 +2,7 @@ package pl.jg.eas.exceptions;
 
 public class RoleDoesntExistException extends RuntimeException {
 
-    private String roleName;
+    private final String roleName;
 
     public RoleDoesntExistException(String roleName) {
         this.roleName = roleName;

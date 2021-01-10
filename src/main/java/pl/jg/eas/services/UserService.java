@@ -8,7 +8,6 @@ import pl.jg.eas.dtos.EditUserForm;
 import pl.jg.eas.dtos.NewUserForm;
 import pl.jg.eas.entities.Role;
 import pl.jg.eas.entities.User;
-import pl.jg.eas.exceptions.RoleDoesntExistException;
 import pl.jg.eas.exceptions.UserDoesntExistException;
 import pl.jg.eas.exceptions.UserWithSuchEmailExistsException;
 
@@ -26,22 +25,25 @@ public class UserService {
     }
 
     public void registerUser(NewUserForm newUserForm) {
-        final User user = userRepository.findUserByEmail(newUserForm.getEmail())
-                .orElse(new User());
+
+        final String email = newUserForm.getEmail();
+        final boolean existsByEmail = userRepository.existsByEmail(email);
+
+        if (existsByEmail) {
+            throw new UserWithSuchEmailExistsException(email);
+        }
         final String roleName = "ROLE_COMMON_USER";
         final Role role = roleRepository.findRoleByRoleName(roleName)
-                .orElseThrow(() -> new RoleDoesntExistException(roleName));
+                .orElseGet(() -> roleRepository.save(new Role(roleName)));
 
-        if (user.getEmail() != null) {
-            throw new UserWithSuchEmailExistsException(newUserForm.getEmail());
-        } else {
-            user.setEmail(newUserForm.getEmail());
-            user.setPassword(passwordEncoder.encode(newUserForm.getPassword()));
-            user.setNickname(newUserForm.getNickname());
-            user.addRole(role);
+        final User user = new User();
 
-            userRepository.save(user);
-        }
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(newUserForm.getPassword()));
+        user.setNickname(newUserForm.getNickname());
+        user.addRole(role);
+
+        userRepository.save(user);
     }
 
     public void editUser(EditUserForm editUserForm, String currentlyLoggedUser) {

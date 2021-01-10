@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,6 +19,7 @@ public class Comment {
     @Column(name = "nickname")
     private String commentatorEmail;
 
+    @Column(length = 500)
     private String commentText;
 
     private LocalDateTime added = LocalDateTime.now();

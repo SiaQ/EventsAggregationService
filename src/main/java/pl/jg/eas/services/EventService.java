@@ -12,7 +12,6 @@ import pl.jg.eas.entities.Event;
 import pl.jg.eas.entities.Role;
 import pl.jg.eas.entities.User;
 import pl.jg.eas.exceptions.EventDoesntExistException;
-import pl.jg.eas.exceptions.RoleDoesntExistException;
 import pl.jg.eas.exceptions.UserDoesntExistException;
 
 import javax.transaction.Transactional;
@@ -31,6 +30,8 @@ public class EventService {
     private final EventRepository eventRepository;
     private final RoleRepository roleRepository;
     private final CommentRepository commentRepository;
+    private final Sort startDate = Sort.by("startDate").ascending();
+    private final LocalDate now = LocalDate.now();
 
     public EventService(UserContextService userContextService, UserRepository userRepository, EventRepository eventRepository, RoleRepository roleRepository, CommentRepository commentRepository) {
         this.userContextService = userContextService;
@@ -40,8 +41,6 @@ public class EventService {
         this.commentRepository = commentRepository;
     }
 
-    private final LocalDate now = LocalDate.now();
-
     public void addEvent(NewEventForm newEventForm) {
         final String currentlyLoggedUserEmail = userContextService.getCurrentlyLoggedUserEmail();
 
@@ -50,7 +49,7 @@ public class EventService {
 
         final String roleName = "ROLE_EVENT_MANAGER";
         final Role role = roleRepository.findRoleByRoleName(roleName)
-                .orElseThrow(() -> new RoleDoesntExistException(roleName));
+                .orElseGet(() -> roleRepository.save(new Role(roleName)));
 
         final Event event = new Event();
 
@@ -68,7 +67,7 @@ public class EventService {
     }
 
     public List<EventShortInfoDto> getCurrentAndFutureEvents() {
-        return eventRepository.findByEndDateAfter(now, Sort.by("startDate").ascending())
+        return eventRepository.findByEndDateAfter(now, startDate)
                 .stream()
                 .map(event -> new EventShortInfoDto(
                         event.getId(),
@@ -84,7 +83,7 @@ public class EventService {
         List<EventShortInfoDto> eventsList = new ArrayList<>();
 
         if (time.equals("future")) {
-            eventsList.addAll(eventRepository.findByTitleContainingAndStartDateAfter(title, now, Sort.by("startDate").ascending())
+            eventsList.addAll(eventRepository.findByTitleContainingAndStartDateAfter(title, now, startDate)
                     .stream()
                     .map(event -> new EventShortInfoDto(
                             event.getId(),
@@ -95,7 +94,7 @@ public class EventService {
                     ))
                     .collect(Collectors.toList()));
         } else if (time.equals("currentAndFuture")) {
-            eventsList.addAll(eventRepository.findByTitleContainingAndEndDateAfter(title, now, Sort.by("startDate").ascending())
+            eventsList.addAll(eventRepository.findByTitleContainingAndEndDateAfter(title, now, startDate)
                     .stream()
                     .map(event -> new EventShortInfoDto(
                             event.getId(),
@@ -106,7 +105,7 @@ public class EventService {
                     ))
                     .collect(Collectors.toList()));
         } else {
-            eventsList.addAll(eventRepository.findByTitleContaining(title, Sort.by("startDate").ascending())
+            eventsList.addAll(eventRepository.findByTitleContaining(title, startDate)
                     .stream()
                     .map(event -> new EventShortInfoDto(
                             event.getId(),
@@ -235,4 +234,19 @@ public class EventService {
         final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
         return event.getSignedUpForEvents();
     }
+
+    public List<EventShortInfoDto> getUserOwnerEvents(String currentlyLoggedUserEmail) {
+        return eventRepository.findByUserEmail(currentlyLoggedUserEmail, startDate)
+                .stream()
+                .map(event -> new EventShortInfoDto(event.getId(),
+                        event.getTitle(),
+                        event.getStartDate(),
+                        event.getEndDate(),
+                        event.getDescription()))
+                .collect(Collectors.toList());
+    }
+
+//    public List<EventShortInfoDto> getUserSignedUpForEvents(String currentlyLoggedUserEmail) {
+//
+//    }
 }

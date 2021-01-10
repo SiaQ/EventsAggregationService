@@ -14,4 +14,5 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByTitleContainingAndStartDateAfter(String title, LocalDate date, Sort sort);
     List<Event> findByTitleContainingAndEndDateAfter(String title, LocalDate date, Sort sort);
     Optional<Event> findById(Long id);
+    List<Event> findByUserEmail(String email, Sort sort);
 }

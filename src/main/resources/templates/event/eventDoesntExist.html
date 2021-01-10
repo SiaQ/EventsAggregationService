@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
-<head>
+<head th:replace="navbar :: header">
     <meta charset="UTF-8">
     <title>EAS - Error</title>
 </head>
 <body>
 
-<div th:include="navbar.html"></div>
+<div th:insert="navbar :: body"></div>
 
 <h1 class="text-center">Event doesn't exist!</h1>
 

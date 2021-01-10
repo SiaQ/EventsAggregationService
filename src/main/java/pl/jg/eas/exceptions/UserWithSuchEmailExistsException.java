@@ -2,7 +2,7 @@ package pl.jg.eas.exceptions;
 
 public class UserWithSuchEmailExistsException extends RuntimeException {
 
-    private String email;
+    private final String email;
 
     public UserWithSuchEmailExistsException(String email) {
         this.email = email;

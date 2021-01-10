@@ -2,7 +2,7 @@ package pl.jg.eas.exceptions;
 
 public class EventDoesntExistException extends RuntimeException {
 
-    private Long eventId;
+    private final Long eventId;
 
     public EventDoesntExistException(Long eventId) {
         this.eventId = eventId;

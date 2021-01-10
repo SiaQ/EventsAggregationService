@@ -2,16 +2,17 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="navbar :: header">
     <meta charset="UTF-8">
-    <title>EAS - Home</title>
+    <title>EAS - User events</title>
 </head>
+
 <body>
 
 <div th:insert="navbar :: body"></div>
 
-<h1 class="text-center">Current and future events</h1>
+<h1 class="text-center">User owner events</h1>
 <hr>
 <div class="container" style="width: 1000px">
-    <div th:each="event : ${events}" class="card m-3" style="width: 18rem; display: inline-block">
+    <div th:each="event : ${userOwnerEvents}" class="card m-3" style="width: 18rem; display: inline-block">
         <div class="card-body">
             <h5 class="card-title"><a th:href="@{events/{eventId}(eventId=${event.id})}" th:text="${event.title}">Event title</a></h5>
             <h6 class="card-subtitle mb-2 text-muted" th:text="${event.startDate + ' to ' + event.endDate}"></h6>

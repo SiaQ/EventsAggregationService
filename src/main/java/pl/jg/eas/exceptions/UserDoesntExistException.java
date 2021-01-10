@@ -2,7 +2,7 @@ package pl.jg.eas.exceptions;
 
 public class UserDoesntExistException extends RuntimeException {
 
-    private String email;
+    private final String email;
 
     public UserDoesntExistException(String email) {
         this.email = email;

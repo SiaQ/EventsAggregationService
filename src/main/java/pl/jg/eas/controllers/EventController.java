@@ -19,6 +19,8 @@ public class EventController {
 
     private final EventService eventService;
     private final UserContextService userContextService;
+    private static final String loggedAs = "loggedAs";
+    private static final String redirectEvents = "redirect:/events/";
 
     public EventController(EventService eventService, UserContextService userContextService) {
         this.eventService = eventService;
@@ -29,7 +31,7 @@ public class EventController {
     public String addEventForm(Model model) {
         final NewEventForm newEventForm = new NewEventForm();
 
-        model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         model.addAttribute("newEventForm", newEventForm);
 
         return "event/addEventForm";
@@ -42,11 +44,11 @@ public class EventController {
             Model model
     ) {
         if(bindingResult.hasErrors()) {
-            model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+            model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
             return "event/addEventForm";
         }
 
-        model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         eventService.addEvent(newEventForm);
 
         return "event/eventAddedView";
@@ -58,7 +60,7 @@ public class EventController {
             @RequestParam String time,
             Model model
     ) {
-        model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         model.addAttribute("foundEvents", eventService.getEventsContaining(title, time));
 
         return "event/foundEventsView";
@@ -71,7 +73,7 @@ public class EventController {
     ) {
         final String currentlyLoggedUser = userContextService.getCurrentlyLoggedUserEmail();
         final NewCommentForm newCommentForm = new NewCommentForm();
-        model.addAttribute("loggedAs", currentlyLoggedUser);
+        model.addAttribute(loggedAs, currentlyLoggedUser);
         model.addAttribute("isOwnerOrAdmin", eventService.isOwnerOrAdmin(eventId, currentlyLoggedUser));
         model.addAttribute("newCommentForm", newCommentForm);
         model.addAttribute("isSignedUpFor", eventService.isSignedUp(eventId, userContextService.getCurrentlyLoggedUserEmail()));
@@ -80,7 +82,7 @@ public class EventController {
         final Optional<EventInfoDto> singleEventInfo = eventService.getSingleEventInfo(eventId);
 
         if(singleEventInfo.isEmpty()) {
-            model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+            model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
             return "event/eventDoesntExist";
         }
 
@@ -96,13 +98,13 @@ public class EventController {
     ) {
         final EditEventForm editEventForm = new EditEventForm();
 
-        model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         model.addAttribute("editEventForm", editEventForm);
 
         final Optional<EventInfoDto> singleEventInfo = eventService.getSingleEventInfo(eventId);
 
         if(singleEventInfo.isEmpty()) {
-            model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+            model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
             return "event/eventDoesntExist";
         }
 
@@ -120,14 +122,14 @@ public class EventController {
     ) {
 
         if(bindingResult.hasErrors()) {
-            model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+            model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
             return "event/editEventForm";
         }
 
-        model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         eventService.editEvent(editEventForm, eventId);
 
-        return "redirect:/events/" + eventId;
+        return redirectEvents + eventId;
     }
 
     @PostMapping("/events/{eventId}/comment/add")
@@ -139,14 +141,14 @@ public class EventController {
             ) {
 
         if(bindingResult.hasErrors()) {
-            model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
-            return "redirect:/events/" + eventId;
+            model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
+            return redirectEvents + eventId;
         }
 
-        model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         eventService.addNewComment(eventId, newCommentForm, userContextService.getCurrentlyLoggedUserEmail());
 
-        return "redirect:/events/" + eventId;
+        return redirectEvents + eventId;
     }
 
     @PostMapping("/events/{eventId}/sign-up")
@@ -154,10 +156,10 @@ public class EventController {
             @PathVariable Long eventId,
             Model model
     ) {
-        model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         eventService.signUp(eventId, userContextService.getCurrentlyLoggedUserEmail());
 
-        return "redirect:/events/" + eventId;
+        return redirectEvents + eventId;
     }
 
     @PostMapping("/events/{eventId}/sign-off")
@@ -165,9 +167,9 @@ public class EventController {
             @PathVariable Long eventId,
             Model model
     ) {
-        model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+        model.addAttribute(loggedAs, userContextService.getCurrentlyLoggedUserEmail());
         eventService.signOff(eventId, userContextService.getCurrentlyLoggedUserEmail());
 
-        return "redirect:/events/" + eventId;
+        return redirectEvents + eventId;
     }
 }

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
-<head>
+<head th:replace="navbar :: header">
     <meta charset="UTF-8">
-    <title>EAS - Thank You!</title>
+    <title>EAS - Thank you!</title>
 </head>
 <body>
 
-<div th:include="navbar.html"></div>
+<div th:insert="navbar :: body"></div>
 
 <div class="align-content-center">
     <h2>Thank you for adding event!</h2>

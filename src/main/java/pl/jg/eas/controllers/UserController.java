@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import pl.jg.eas.dtos.EditUserForm;
 import pl.jg.eas.dtos.NewUserForm;
+import pl.jg.eas.services.EventService;
 import pl.jg.eas.services.UserContextService;
 import pl.jg.eas.services.UserService;
 
@@ -18,10 +19,12 @@ public class UserController {
 
     private final UserService userService;
     private final UserContextService userContextService;
+    private final EventService eventService;
 
-    public UserController(UserService userService, UserContextService userContextService) {
+    public UserController(UserService userService, UserContextService userContextService, EventService eventService) {
         this.userService = userService;
         this.userContextService = userContextService;
+        this.eventService = eventService;
     }
 
     @GetMapping("/user-register")
@@ -70,5 +73,17 @@ public class UserController {
         userService.editUser(editUserForm, userContextService.getCurrentlyLoggedUserEmail());
 
         return "redirect:/";
+    }
+
+    @GetMapping("/user-events")
+    public String getUserEvents(
+            Model model
+    ) {
+        final String currentlyLoggedUserEmail = userContextService.getCurrentlyLoggedUserEmail();
+        model.addAttribute("loggedAs", currentlyLoggedUserEmail);
+        model.addAttribute("userOwnerEvents", eventService.getUserOwnerEvents(currentlyLoggedUserEmail));
+//        model.addAttribute("userSignedUpForEvents", eventService.getUserSignedUpForEvents(currentlyLoggedUserEmail));
+
+        return "user/userEventsView";
     }
 }

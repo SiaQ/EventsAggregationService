@@ -2,7 +2,6 @@ package pl.jg.eas.dtos;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.validator.constraints.UniqueElements;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -12,7 +11,7 @@ import javax.validation.constraints.Size;
 @Setter
 public class NewUserForm {
 
-    @Email(message = "User already exists")
+    @Email(message = "Incorrect email")
     private String email;
 
     @Size(min = 8, max = 30, message = "Password length should be at least 8 and max 30")

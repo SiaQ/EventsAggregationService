@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
-<head>
+<head th:replace="navbar :: header">
     <meta charset="UTF-8">
     <title>EAS - Login</title>
 </head>
+
 <body>
 
-<div th:include="navbar.html"></div>
+<div th:insert="navbar :: body"></div>
+
+<h1 class="text-center">Login</h1>
+<hr>
 
 <form th:action="@{/user-login-submit-data}" method="post" style="width: 500px; margin: auto;">
     <div class="mb-3">
