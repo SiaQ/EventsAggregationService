@@ -9,7 +9,6 @@ import javax.persistence.*;
 
 @Entity
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "roles")
@@ -22,6 +21,10 @@ public class Role {
     private String roleName;
 
     public Role(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public void setRoleName(String roleName) {
         this.roleName = roleName;
     }
 }

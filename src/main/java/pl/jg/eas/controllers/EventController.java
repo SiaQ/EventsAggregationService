@@ -57,6 +57,8 @@ public class EventController {
             @RequestParam String time,
             Model model
     ) {
+        model.addAttribute("title", title);
+        model.addAttribute("time", time);
         model.addAttribute("foundEvents", eventService.getEventsContaining(title, time));
 
         return "event/foundEventsView";

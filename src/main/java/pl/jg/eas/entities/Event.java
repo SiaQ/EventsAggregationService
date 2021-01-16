@@ -1,15 +1,15 @@
 package pl.jg.eas.entities;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -37,7 +37,7 @@ public class Event {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_signed_events")
-    private Set<User> signedUpForEvents = new HashSet<>();
+    private final Set<User> signedUpForEvents = new HashSet<>();
 
     public void signUp(User user) {
         signedUpForEvents.add(user);
@@ -47,31 +47,23 @@ public class Event {
         signedUpForEvents.remove(user);
     }
 
-    public Set<User> getSignedUpForEvents() {
-        return signedUpForEvents;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public Long getId() {
-        return id;
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
     }
 
-    public String getTitle() {
-        return title;
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 
-    public LocalDate getStartDate() {
-        return startDate;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public User getUser() {
-        return user;
+    public void setUser(User user) {
+        this.user = user;
     }
 }

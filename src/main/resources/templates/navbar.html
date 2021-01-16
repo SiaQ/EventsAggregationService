@@ -55,12 +55,14 @@
     </div>
     <div class="collapse navbar-collapse" style="display: flex; justify-content: flex-end">
         <form class="form-inline my-2 my-lg-0" th:action="@{/search-events}">
-            <input class="form-control mr-sm-2" type="search" name="title" placeholder="Search for event..." aria-label="Search">
+            <input class="form-control mr-sm-2" type="search" name="title" placeholder="Search for event..." th:value="${title}" aria-label="Search">
             <label class="form-text mr-sm-2">Choose a time: </label>
             <select name="time" class="form-control mr-sm-2">
-                <option value="future">Future</option>
-                <option value="currentAndFuture">Current and future</option>
-                <option value="all">All</option>
+                <option th:each="option : ${searchOptions}"
+                        th:value="${option.optionName}"
+                        th:text="${option.optionName}"
+                        th:selected="${option.optionName.equals(time)}">
+                </option>
             </select>
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
         </form>

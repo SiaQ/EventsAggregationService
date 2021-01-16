@@ -1,14 +1,12 @@
 package pl.jg.eas.entities;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
 @Table(name = "comments")
 public class Comment {
     @Id
@@ -26,4 +24,16 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "event_id")
     private Event event;
+
+    public void setCommentatorEmail(String commentatorEmail) {
+        this.commentatorEmail = commentatorEmail;
+    }
+
+    public void setCommentText(String commentText) {
+        this.commentText = commentText;
+    }
+
+    public void setEvent(Event event) {
+        this.event = event;
+    }
 }

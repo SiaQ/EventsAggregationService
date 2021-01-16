@@ -70,12 +70,12 @@ public class EventService {
     public List<EventShortInfoDto> getEventsContaining(String title, String time) {
         List<EventShortInfoDto> eventsList = new ArrayList<>();
 
-        if ("future".equals(time)) {
+        if ("Future".equals(time)) {
             eventsList.addAll(eventRepository.findByTitleContainingAndStartDateAfter(title, LocalDate.now(), START_DATE)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList()));
-        } else if (time.equals("currentAndFuture")) {
+        } else if (time.equals("Current and future")) {
             eventsList.addAll(eventRepository.findByTitleContainingAndEndDateGreaterThanEqual(title, LocalDate.now(), START_DATE)
                     .stream()
                     .map(this::convertToDto)
@@ -226,5 +226,19 @@ public class EventService {
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    public List<EventShortInfoDto> getFutureEvents(boolean dateFilter, String after, String before) {
+        if(dateFilter) {
+            return eventRepository.findByStartDateGreaterThanEqualAndEndDateLessThanEqual(LocalDate.parse(after), LocalDate.parse(before), START_DATE)
+                    .stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+        } else {
+            return eventRepository.findByStartDateGreaterThanEqual(LocalDate.now(), START_DATE)
+                    .stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+        }
     }
 }
