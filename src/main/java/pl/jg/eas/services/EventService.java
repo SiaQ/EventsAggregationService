@@ -71,12 +71,14 @@ public class EventService {
         List<EventShortInfoDto> eventsList = new ArrayList<>();
 
         if ("Future".equals(time)) {
-            eventsList.addAll(eventRepository.findByTitleContainingAndStartDateAfter(title, LocalDate.now(), START_DATE)
+            eventsList.addAll(eventRepository.findByTitleContainingAndStartDateAfter(
+                    title, LocalDate.now(), START_DATE)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList()));
         } else if (time.equals("Current and future")) {
-            eventsList.addAll(eventRepository.findByTitleContainingAndEndDateGreaterThanEqual(title, LocalDate.now(), START_DATE)
+            eventsList.addAll(eventRepository.findByTitleContainingAndEndDateGreaterThanEqual(
+                    title, LocalDate.now(), START_DATE)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList()));
@@ -167,7 +169,8 @@ public class EventService {
     }
 
     public void addNewComment(Long eventId, NewCommentForm newCommentForm, String currentlyLoggedUser) {
-        final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
+        final Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventDoesntExistException(eventId));
 
         final Comment comment = new Comment();
         comment.setCommentatorEmail(currentlyLoggedUser);
@@ -178,8 +181,10 @@ public class EventService {
     }
 
     public void signUp(Long eventId, String currentlyLoggedUser) {
-        final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
-        final User user = userRepository.findUserByEmail(currentlyLoggedUser).orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
+        final Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventDoesntExistException(eventId));
+        final User user = userRepository.findUserByEmail(currentlyLoggedUser)
+                .orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
 
         event.signUp(user);
 
@@ -230,7 +235,8 @@ public class EventService {
 
     public List<EventShortInfoDto> getFutureEvents(boolean dateFilter, String after, String before) {
         if(dateFilter) {
-            return eventRepository.findByStartDateGreaterThanEqualAndEndDateLessThanEqual(LocalDate.parse(after), LocalDate.parse(before), START_DATE)
+            return eventRepository.findByStartDateGreaterThanEqualAndEndDateLessThanEqual(
+                    LocalDate.parse(after), LocalDate.parse(before), START_DATE)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());

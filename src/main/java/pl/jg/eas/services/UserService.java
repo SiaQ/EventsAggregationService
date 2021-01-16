@@ -11,6 +11,8 @@ import pl.jg.eas.entities.User;
 import pl.jg.eas.exceptions.UserDoesntExistException;
 import pl.jg.eas.exceptions.UserWithSuchEmailExistsException;
 
+import javax.transaction.Transactional;
+
 @Service
 public class UserService {
 
@@ -24,6 +26,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public void registerUser(NewUserForm newUserForm) {
 
         final String email = newUserForm.getEmail();
@@ -47,7 +50,8 @@ public class UserService {
     }
 
     public void editUser(EditUserForm editUserForm, String currentlyLoggedUser) {
-        final User user = userRepository.findUserByEmail(currentlyLoggedUser).orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
+        final User user = userRepository.findUserByEmail(currentlyLoggedUser)
+                .orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
 
         user.setNickname(editUserForm.getNickname());
         user.setPassword(passwordEncoder.encode(editUserForm.getPassword()));

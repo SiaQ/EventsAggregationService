@@ -71,9 +71,11 @@ public class EventController {
     ) {
         final String currentlyLoggedUser = userContextService.getCurrentlyLoggedUserEmail();
         final NewCommentForm newCommentForm = new NewCommentForm();
-        model.addAttribute("isOwnerOrAdmin", eventService.isOwnerOrAdmin(eventId, currentlyLoggedUser));
+        model.addAttribute("isOwnerOrAdmin", eventService.isOwnerOrAdmin(
+                eventId, currentlyLoggedUser));
         model.addAttribute("newCommentForm", newCommentForm);
-        model.addAttribute("isSignedUpFor", eventService.isSignedUp(eventId, userContextService.getCurrentlyLoggedUserEmail()));
+        model.addAttribute("isSignedUpFor", eventService.isSignedUp(
+                eventId, userContextService.getCurrentlyLoggedUserEmail()));
         model.addAttribute("usersSignedUpFor", eventService.getSignedUpUsers(eventId));
 
         final Optional<EventInfoDto> singleEventInfo = eventService.getSingleEventInfo(eventId);
