@@ -10,42 +10,53 @@
 
 <div class="jumbotron">
     <h1 class="display-4" th:text="${event.title}">Event title</h1>
-    <p class="lead" th:text="${event.startDate + ' to ' + event.endDate}">Event date</p>
+    <p class="lead"
+       th:text="${#temporals.format(event.startDate, 'dd.MM.yyyy') + ' to ' + #temporals.format(event.endDate, 'dd.MM.yyyy')}">
+        Event date
+    </p>
     <hr class="my-4">
     <p th:text="${event.description}"></p>
-    <span th:if="${!isOwnerOrAdmin}" class="d-inline-block" data-toggle="tooltip" title="You are not owner or admin!">
-        <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Edit</button>
-    </span>
-    <span th:if="${loggedAs == null}" class="d-inline-block" data-toggle="tooltip" title="You are not logged!">
-        <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Sign up</button>
-    </span>
-    <span th:if="${isOwnerOrAdmin}" class="d-inline-block">
+
+    <div th:if="${loggedAs == null}" class="d-inline-block" data-toggle="tooltip" title="You are not logged!">
+        <button class="btn btn-primary" style="pointer-events: none; width: 200px" type="button" disabled>Login or sign up first</button>
+    </div>
+
+    <div th:if="${isOwnerOrAdmin}" class="d-inline-block">
         <a class="btn btn-primary" th:href="@{{eventId}/edit(eventId=${event.id})}" role="button"
-           th:if="${isOwnerOrAdmin}">Edit</a>
-    </span>
+           th:if="${isOwnerOrAdmin}" style="width: 200px">Edit</a>
+    </div>
+
     <span th:if="${loggedAs != null}">
-        <span th:if="${!isSignedUpFor}" class="d-inline-block">
+        <span th:if="${!isSignedUpFor}" class="d-inline-block" style="width: 200px">
             <form th:action="@{{eventId}/sign-up(eventId=${event.id})}" method="post">
-                <button class="btn btn-primary" type="submit">Sign up!</button>
+                <button class="btn btn-primary" type="submit">Sign up for the event!</button>
             </form>
         </span>
-        <span th:if="${isSignedUpFor}" class="d-inline-block" data-toggle="tooltip" title="You are already signed up for this event!">
-            <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Signed up!</button>
-            <span class="d-inline-block">
+        <div th:if="${isSignedUpFor}" class="d-inline-block">
+            <button class="btn btn-primary" style="pointer-events: none; width: 200px" type="button" disabled
+                    data-toggle="tooltip" title="You are already signed up for this event!">
+                Signed up!
+            </button>
+            <div class="d-inline-block" style="width: 200px">
                 <form th:action="@{{eventId}/sign-off(eventId=${event.id})}" method="post">
-                    <button class="btn btn-primary" type="submit">Sign off!</button>
+                    <button class="btn btn-primary" type="submit">Sign off from the event!</button>
                 </form>
-            </span>
-        </span>
+            </div>
+        </div>
     </span>
+
     <div class="dropdown" style="margin-top: 5px">
-        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+        <button class="btn btn-primary dropdown-toggle"
+                type="button"
+                data-toggle="dropdown"
+                style="width: 200px">
             Signed up users
         </button>
-        <div class="dropdown-menu" th:each="user : ${usersSignedUpFor}">
-            <p class="dropdown-item-text" th:text="${user.email}"></p>
+        <div class="dropdown-menu" style="width: 200px">
+            <span class="dropdown-item-text" th:each="user : ${usersSignedUpFor}" th:text="${user.email}"></span>
         </div>
     </div>
+
 </div>
 
 <hr>
@@ -57,22 +68,28 @@
         <div th:if="${loggedAs == null}">
             <div class="mb-3">
                 <label class="form-label">Comment</label>
-                <input type="text" th:field="*{comment}" class="form-control" placeholder="Enter comment text..."
-                       disabled>
+                <label>
+                    <input type="text" th:field="*{comment}" class="form-control" placeholder="Enter comment text..."
+                           disabled>
+                </label>
                 <span th:errors="*{comment}"></span>
             </div>
             <span class="d-inline-block" data-toggle="tooltip" title="You are not logged!">
                 <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Add comment</button>
             </span>
         </div>
+
         <div th:if="${loggedAs != null}">
             <div class="mb-3">
                 <label class="form-label">Comment</label>
-                <input type="text" th:field="*{comment}" class="form-control" placeholder="Enter comment text...">
+                <label>
+                    <input type="text" th:field="*{comment}" class="form-control" placeholder="Enter comment text...">
+                </label>
                 <span th:errors="*{comment}"></span>
             </div>
             <button type="submit" class="btn btn-primary">Add comment</button>
         </div>
+
     </form>
 </div>
 
@@ -83,7 +100,7 @@
     <div class="list-group" th:each="comment : ${event.comments}">
         <div class="list-group-item">
             <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1" th:text="${comment.nickname}">Nickname</h5>
+                <h5 class="mb-1" th:text="${comment.commentator.email}">Nickname</h5>
                 <small th:text="${#temporals.format(comment.added, 'yyyy-MM-dd HH:mm')}">Added</small>
             </div>
             <p class="mb-1" th:text="${comment.text}">Text</p>

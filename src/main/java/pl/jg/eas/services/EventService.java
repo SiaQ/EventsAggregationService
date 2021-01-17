@@ -8,17 +8,15 @@ import pl.jg.eas.dao.UserRepository;
 import pl.jg.eas.dtos.*;
 import pl.jg.eas.entities.Comment;
 import pl.jg.eas.entities.Event;
-import pl.jg.eas.entities.Role;
 import pl.jg.eas.entities.User;
+import pl.jg.eas.enums.PeriodCriteria;
 import pl.jg.eas.exceptions.EventDoesntExistException;
 import pl.jg.eas.exceptions.NotOwnerException;
 import pl.jg.eas.exceptions.UserDoesntExistException;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -67,28 +65,26 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-    public List<EventShortInfoDto> getEventsContaining(String title, String time) {
-        List<EventShortInfoDto> eventsList = new ArrayList<>();
+    public List<EventShortInfoDto> getEventsContaining(String title, PeriodCriteria periodCriteria) {
 
-        if ("Future".equals(time)) {
-            eventsList.addAll(eventRepository.findByTitleContainingAndStartDateAfter(
+        if (periodCriteria == PeriodCriteria.FUTURE) {
+            return eventRepository.findByTitleContainingAndStartDateAfter(
                     title, LocalDate.now(), START_DATE)
                     .stream()
                     .map(this::convertToDto)
-                    .collect(Collectors.toList()));
-        } else if (time.equals("Current and future")) {
-            eventsList.addAll(eventRepository.findByTitleContainingAndEndDateGreaterThanEqual(
+                    .collect(Collectors.toList());
+        } else if (periodCriteria == PeriodCriteria.CURRENT_AND_FUTURE) {
+            return eventRepository.findByTitleContainingAndEndDateGreaterThanEqual(
                     title, LocalDate.now(), START_DATE)
                     .stream()
                     .map(this::convertToDto)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList());
         } else {
-            eventsList.addAll(eventRepository.findByTitleContaining(title, START_DATE)
+            return eventRepository.findByTitleContaining(title, START_DATE)
                     .stream()
                     .map(this::convertToDto)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList());
         }
-        return eventsList;
     }
 
     private EventShortInfoDto convertToDto(Event event) {
@@ -101,53 +97,35 @@ public class EventService {
         );
     }
 
-    public Optional<EventInfoDto> getSingleEventInfo(Long eventId) {
-        final Optional<EventInfoDto> eventInfoDtoOptional = eventRepository.findById(eventId)
+    public EventInfoDto getSingleEventInfo(Long eventId) {
+        final EventInfoDto eventInfoDto = eventRepository.findById(eventId)
                 .map(event -> new EventInfoDto(event.getId(),
                         event.getTitle(),
                         event.getStartDate(),
                         event.getEndDate(),
-                        event.getDescription()));
+                        event.getDescription()))
+                .orElseThrow(() -> new EventDoesntExistException(eventId));
 
-        eventInfoDtoOptional.ifPresent(eventInfoDto -> {
-            final List<CommentDto> commentDtos = commentRepository
-                    .findByEventId(eventId, Sort.by("added").descending())
-                    .stream()
-                    .map(comment -> new CommentDto(comment.getCommentatorEmail(),
-                            comment.getAdded(),
-                            comment.getCommentText()))
-                    .collect(Collectors.toList());
+        final List<CommentDto> comments = commentRepository.findByEventId(eventId, Sort.by("added").descending())
+                .stream()
+                .map(comment -> new CommentDto(
+                        comment.getAdded(),
+                        comment.getCommentText(),
+                        comment.getUser()))
+                .collect(Collectors.toList());
 
-            eventInfoDto.setComments(commentDtos);
-        });
+        eventInfoDto.setComments(comments);
 
-        return eventInfoDtoOptional;
+        return eventInfoDto;
     }
 
     public boolean isOwnerOrAdmin(Long eventId, String currentlyLoggedUser) {
-        boolean isOwnerOrAdmin = false;
-
-        final Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EventDoesntExistException(eventId));
-
-        if (currentlyLoggedUser != null) {
-            final Set<Role> roles = userRepository.findUserByEmail(currentlyLoggedUser)
-                    .orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser))
-                    .getRoles();
-
-            for (Role role : roles) {
-                if (role.getRoleName().equals("ROLE_ADMIN")) {
-                    isOwnerOrAdmin = true;
-                    break;
-                }
-            }
+        if (currentlyLoggedUser == null) {
+            return false;
         }
 
-        if (event.getUser().getEmail().equals(currentlyLoggedUser)) {
-            isOwnerOrAdmin = true;
-        }
-
-        return isOwnerOrAdmin;
+        return userRepository.existsByEmailAndRolesRoleName(currentlyLoggedUser, "ROLE_ADMIN") ||
+                eventRepository.existsByIdAndUserEmail(eventId, currentlyLoggedUser);
     }
 
     public void editEvent(EditEventForm editEventForm, Long eventId) {
@@ -172,8 +150,11 @@ public class EventService {
         final Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventDoesntExistException(eventId));
 
+        final User user = userRepository.findUserByEmail(currentlyLoggedUser)
+                .orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
+
         final Comment comment = new Comment();
-        comment.setCommentatorEmail(currentlyLoggedUser);
+        comment.setUser(user);
         comment.setCommentText(newCommentForm.getComment());
         comment.setEvent(event);
 
@@ -193,8 +174,10 @@ public class EventService {
 
     @Transactional
     public void signOff(Long eventId, String currentlyLoggedUser) {
-        final Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventDoesntExistException(eventId));
-        final User user = userRepository.findUserByEmail(currentlyLoggedUser).orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
+        final Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventDoesntExistException(eventId));
+        final User user = userRepository.findUserByEmail(currentlyLoggedUser)
+                .orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
 
         event.signOff(user);
 
@@ -202,22 +185,8 @@ public class EventService {
     }
 
     public boolean isSignedUp(Long eventId, String currentlyLoggedUser) {
-        boolean isSignedUp = false;
+        return eventRepository.existsByIdAndSignedUpForEventsEmail(eventId, currentlyLoggedUser);
 
-        if (currentlyLoggedUser != null) {
-            final Set<User> signedUpForEvents = eventRepository.findById(eventId)
-                    .orElseThrow(() -> new EventDoesntExistException(eventId))
-                    .getSignedUpForEvents();
-
-            for (User user : signedUpForEvents) {
-                if (user.getEmail().equals(currentlyLoggedUser)) {
-                    isSignedUp = true;
-                    break;
-                }
-            }
-        }
-
-        return isSignedUp;
     }
 
     public Set<User> getSignedUpUsers(Long eventId) {
@@ -234,7 +203,7 @@ public class EventService {
     }
 
     public List<EventShortInfoDto> getFutureEvents(boolean dateFilter, String after, String before) {
-        if(dateFilter) {
+        if (dateFilter) {
             return eventRepository.findByStartDateGreaterThanEqualAndEndDateLessThanEqual(
                     LocalDate.parse(after), LocalDate.parse(before), START_DATE)
                     .stream()

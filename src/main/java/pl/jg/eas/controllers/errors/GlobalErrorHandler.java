@@ -26,14 +26,14 @@ public class GlobalErrorHandler {
         return "user/userAlreadyExist";
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserDoesntExistException.class)
     private String handle(UserDoesntExistException e) {
 
         return "user/userDoesntExist";
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(EventDoesntExistException.class)
     private String handle(EventDoesntExistException e, Model model) {
 

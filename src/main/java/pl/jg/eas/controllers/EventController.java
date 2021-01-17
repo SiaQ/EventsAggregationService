@@ -5,14 +5,13 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import pl.jg.eas.dtos.EditEventForm;
-import pl.jg.eas.dtos.EventInfoDto;
 import pl.jg.eas.dtos.NewCommentForm;
 import pl.jg.eas.dtos.NewEventForm;
+import pl.jg.eas.enums.PeriodCriteria;
 import pl.jg.eas.services.EventService;
 import pl.jg.eas.services.UserContextService;
 
 import javax.validation.Valid;
-import java.util.Optional;
 
 @Controller
 public class EventController {
@@ -54,12 +53,12 @@ public class EventController {
     @GetMapping("/search-events")
     public String searchEvents(
             @RequestParam String title,
-            @RequestParam String time,
+            @RequestParam PeriodCriteria periodCriteria,
             Model model
     ) {
         model.addAttribute("title", title);
-        model.addAttribute("time", time);
-        model.addAttribute("foundEvents", eventService.getEventsContaining(title, time));
+        model.addAttribute("periodCriteria", periodCriteria);
+        model.addAttribute("foundEvents", eventService.getEventsContaining(title, periodCriteria));
 
         return "event/foundEventsView";
     }
@@ -71,16 +70,14 @@ public class EventController {
     ) {
         final String currentlyLoggedUser = userContextService.getCurrentlyLoggedUserEmail();
         final NewCommentForm newCommentForm = new NewCommentForm();
+
         model.addAttribute("isOwnerOrAdmin", eventService.isOwnerOrAdmin(
                 eventId, currentlyLoggedUser));
         model.addAttribute("newCommentForm", newCommentForm);
         model.addAttribute("isSignedUpFor", eventService.isSignedUp(
                 eventId, userContextService.getCurrentlyLoggedUserEmail()));
         model.addAttribute("usersSignedUpFor", eventService.getSignedUpUsers(eventId));
-
-        final Optional<EventInfoDto> singleEventInfo = eventService.getSingleEventInfo(eventId);
-
-        singleEventInfo.ifPresent(eventInfoDto -> model.addAttribute("event", eventInfoDto));
+        model.addAttribute("event", eventService.getSingleEventInfo(eventId));
 
         return "event/singleEventView";
     }
@@ -93,14 +90,7 @@ public class EventController {
         final EditEventForm editEventForm = new EditEventForm();
 
         model.addAttribute("editEventForm", editEventForm);
-
-        final Optional<EventInfoDto> singleEventInfo = eventService.getSingleEventInfo(eventId);
-
-        if (singleEventInfo.isEmpty()) {
-            return "event/eventDoesntExist";
-        }
-
-        model.addAttribute("eventInfo", singleEventInfo.get());
+        model.addAttribute("eventInfo", eventService.getSingleEventInfo(eventId));
 
         return "event/editEventForm";
     }

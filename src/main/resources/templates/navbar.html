@@ -56,12 +56,12 @@
     <div class="collapse navbar-collapse" style="display: flex; justify-content: flex-end">
         <form class="form-inline my-2 my-lg-0" th:action="@{/search-events}">
             <input class="form-control mr-sm-2" type="search" name="title" placeholder="Search for event..." th:value="${title}" aria-label="Search">
-            <label class="form-text mr-sm-2">Choose a time: </label>
-            <select name="time" class="form-control mr-sm-2">
+            <label class="form-text mr-sm-2">Choose a period criteria: </label>
+            <select name="periodCriteria" class="form-control mr-sm-2">
                 <option th:each="option : ${searchOptions}"
-                        th:value="${option.optionName}"
+                        th:value="${option.optionValue}"
                         th:text="${option.optionName}"
-                        th:selected="${option.optionName.equals(time)}">
+                        th:selected="${periodCriteria.name() == option.optionValue}">
                 </option>
             </select>
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>

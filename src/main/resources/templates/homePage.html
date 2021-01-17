@@ -14,7 +14,9 @@
     <div th:each="event : ${events}" class="card m-3" style="width: 18rem; display: inline-block">
         <div class="card-body">
             <h5 class="card-title"><a th:href="@{events/{eventId}(eventId=${event.id})}" th:text="${event.title}">Event title</a></h5>
-            <h6 class="card-subtitle mb-2 text-muted" th:text="${event.startDate + ' to ' + event.endDate}"></h6>
+            <h6 class="card-subtitle mb-2 text-muted"
+                th:text="${#temporals.format(event.startDate, 'dd.MM.yyyy') + ' to ' + #temporals.format(event.endDate, 'dd.MM.yyyy')}">
+            </h6>
             <p class="card-text" th:text="${#strings.abbreviate(event.shortDescription, 53)}"></p>
         </div>
     </div>

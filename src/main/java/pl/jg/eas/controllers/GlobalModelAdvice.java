@@ -3,9 +3,12 @@ package pl.jg.eas.controllers;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import pl.jg.eas.dtos.SearchOption;
+import pl.jg.eas.enums.PeriodCriteria;
 import pl.jg.eas.services.UserContextService;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalModelAdvice {
@@ -23,9 +26,13 @@ public class GlobalModelAdvice {
 
     @ModelAttribute("searchOptions")
     public List<SearchOption> getSearchOptions() {
-        return List.of(
-                new SearchOption("Future"),
-                new SearchOption("Current and future"),
-                new SearchOption("All"));
+        return Arrays.stream(PeriodCriteria.values())
+                .map(periodCriteria -> new SearchOption(periodCriteria.name(), periodCriteria.getCriteriaName()))
+                .collect(Collectors.toList());
+    }
+
+    @ModelAttribute("periodCriteria")
+    public PeriodCriteria periodCriteria() {
+        return PeriodCriteria.FUTURE;
     }
 }

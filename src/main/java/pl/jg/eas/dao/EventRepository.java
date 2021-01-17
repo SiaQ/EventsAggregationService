@@ -17,4 +17,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByUserEmail(String email, Sort sort);
     List<Event> findByStartDateGreaterThanEqual(LocalDate now, Sort sort);
     List<Event> findByStartDateGreaterThanEqualAndEndDateLessThanEqual(LocalDate after, LocalDate before, Sort sort);
+    boolean existsByIdAndUserEmail(Long id, String email);
+    boolean existsByIdAndSignedUpForEventsEmail(Long id, String email);
+
 }

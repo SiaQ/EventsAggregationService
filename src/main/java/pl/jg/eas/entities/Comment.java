@@ -13,9 +13,6 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nickname")
-    private String commentatorEmail;
-
     @Column(length = 500)
     private String commentText;
 
@@ -25,9 +22,9 @@ public class Comment {
     @JoinColumn(name = "event_id")
     private Event event;
 
-    public void setCommentatorEmail(String commentatorEmail) {
-        this.commentatorEmail = commentatorEmail;
-    }
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public void setCommentText(String commentText) {
         this.commentText = commentText;
@@ -35,5 +32,9 @@ public class Comment {
 
     public void setEvent(Event event) {
         this.event = event;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
