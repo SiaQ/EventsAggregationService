@@ -10,6 +10,7 @@ import pl.jg.eas.entities.Comment;
 import pl.jg.eas.entities.Event;
 import pl.jg.eas.entities.User;
 import pl.jg.eas.enums.PeriodCriteria;
+import pl.jg.eas.enums.Roles;
 import pl.jg.eas.exceptions.EventDoesntExistException;
 import pl.jg.eas.exceptions.NotOwnerException;
 import pl.jg.eas.exceptions.UserDoesntExistException;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private static final Sort START_DATE = Sort.by("startDate").ascending();
+    private static final String ADDED = "added";
 
     private final UserContextService userContextService;
     private final UserRepository userRepository;
@@ -105,7 +107,7 @@ public class EventService {
                         event.getDescription()))
                 .orElseThrow(() -> new EventDoesntExistException(eventId));
 
-        final List<CommentDto> comments = commentRepository.findByEventId(eventId, Sort.by("added").descending())
+        final List<CommentDto> comments = commentRepository.findByEventId(eventId, Sort.by(ADDED).descending())
                 .stream()
                 .map(comment -> new CommentDto(
                         comment.getAdded(),
@@ -123,7 +125,7 @@ public class EventService {
             return false;
         }
 
-        return userRepository.existsByEmailAndRolesRoleName(currentlyLoggedUser, "ROLE_ADMIN") ||
+        return userRepository.existsByEmailAndRolesRoleName(currentlyLoggedUser, Roles.ADMIN.getRoleName()) ||
                 eventRepository.existsByIdAndUserEmail(eventId, currentlyLoggedUser);
     }
 

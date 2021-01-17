@@ -1,4 +1,4 @@
-package pl.jg.eas.controllers;
+package pl.jg.eas.controllers.global;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;

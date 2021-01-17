@@ -8,6 +8,7 @@ import pl.jg.eas.dtos.EditUserForm;
 import pl.jg.eas.dtos.NewUserForm;
 import pl.jg.eas.entities.Role;
 import pl.jg.eas.entities.User;
+import pl.jg.eas.enums.Roles;
 import pl.jg.eas.exceptions.UserDoesntExistException;
 import pl.jg.eas.exceptions.UserWithSuchEmailExistsException;
 
@@ -35,7 +36,7 @@ public class UserService {
         if (existsByEmail) {
             throw new UserWithSuchEmailExistsException(email);
         }
-        final String roleName = "ROLE_COMMON_USER";
+        final String roleName = Roles.COMMON_USER.getRoleName();
         final Role role = roleRepository.findRoleByRoleName(roleName)
                 .orElseGet(() -> roleRepository.save(new Role(roleName)));
 

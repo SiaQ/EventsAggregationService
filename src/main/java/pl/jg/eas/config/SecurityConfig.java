@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import pl.jg.eas.enums.Roles;
 
 import javax.sql.DataSource;
 
@@ -23,10 +24,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                    .antMatchers("/add-event").hasAuthority(ROLE_EVENT_MANAGER)
+                    .antMatchers("/add-event").hasAuthority(Roles.EVENT_MANAGER.getRoleName())
                     .antMatchers("/options").authenticated()
-                    .antMatchers("/events/*/edit").hasAnyAuthority(ROLE_EVENT_MANAGER, "ROLE_ADMIN")
-                    .antMatchers("/events/*/sign-up").hasAuthority("ROLE_COMMON_USER")
+                    .antMatchers("/events/*/edit").hasAnyAuthority(
+                            Roles.EVENT_MANAGER.getRoleName(),
+                            Roles.ADMIN.getRoleName())
+                    .antMatchers("/events/*/sign-up").hasAuthority(Roles.COMMON_USER.getRoleName())
                     .anyRequest().permitAll()
                 .and()
                     .exceptionHandling().accessDeniedPage("/not-allowed")
