@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="navbar :: header">
+<head th:replace="fragments :: header">
     <meta charset="UTF-8">
     <title th:text="${'EAS - ' + event.title}">EAS - single event</title>
 </head>
 <body>
 
-<div th:insert="navbar :: body"></div>
+<div th:insert="fragments :: body"></div>
 
 <div class="jumbotron">
     <h1 class="display-4" th:text="${event.title}">Event title</h1>
@@ -66,22 +66,23 @@
           style="width: 500px; margin-left: 30px">
         <h1>Add comment</h1>
         <div th:if="${loggedAs == null}">
-            <div class="mb-3">
-                <label class="form-label">Comment</label>
+            <div class="mb-0">
                 <label>
-                    <input type="text" th:field="*{comment}" class="form-control" placeholder="Enter comment text..."
-                           disabled>
+                    <input type="text" th:field="*{comment}" class="form-control" style="width: 200px"
+                           placeholder="Enter comment text..." disabled>
                 </label>
                 <span th:errors="*{comment}"></span>
             </div>
             <span class="d-inline-block" data-toggle="tooltip" title="You are not logged!">
-                <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Add comment</button>
+                <button class="btn btn-primary" style="pointer-events: none; width: 200px" type="button"
+                        disabled>
+                    Add comment
+                </button>
             </span>
         </div>
 
         <div th:if="${loggedAs != null}">
-            <div class="mb-3">
-                <label class="form-label">Comment</label>
+            <div class="mb-0">
                 <label>
                     <input type="text" th:field="*{comment}" class="form-control" placeholder="Enter comment text...">
                 </label>
@@ -110,4 +111,5 @@
 
 
 </body>
+<div th:insert="fragments :: footer"></div>
 </html>

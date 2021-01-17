@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="navbar :: header">
+<head th:replace="fragments :: header">
     <meta charset="UTF-8">
     <title>EAS - Register</title>
 </head>
 
 <body>
 
-<div th:insert="navbar :: body"></div>
+<div th:insert="fragments :: body"></div>
 
 <form th:action="@{/user-register}" th:object="${newUserForm}" method="post" style="width: 500px; margin: auto">
     <div class="mb-3">
@@ -29,4 +29,5 @@
 </form>
 
 </body>
+<div th:insert="fragments :: footer"></div>
 </html>
