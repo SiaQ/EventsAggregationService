@@ -76,7 +76,7 @@ public class EventController {
         model.addAttribute("newCommentForm", newCommentForm);
         model.addAttribute("isSignedUpFor", eventService.isSignedUp(
                 eventId, userContextService.getCurrentlyLoggedUserEmail()));
-        model.addAttribute("usersSignedUpFor", eventService.getSignedUpUsers(eventId));
+        model.addAttribute("usersSignedUpFor", eventService.getSignedUpForEventUsers(eventId));
         model.addAttribute("event", eventService.getSingleEventInfo(eventId));
 
         return "event/singleEventView";
@@ -131,7 +131,7 @@ public class EventController {
     public String signUpForEvent(
             @PathVariable Long eventId
     ) {
-        eventService.signUp(eventId, userContextService.getCurrentlyLoggedUserEmail());
+        eventService.signUpForEvent(eventId, userContextService.getCurrentlyLoggedUserEmail());
 
         return REDIRECT_EVENTS + eventId;
     }
@@ -140,7 +140,7 @@ public class EventController {
     public String signOffFromEvent(
             @PathVariable Long eventId
     ) {
-        eventService.signOff(eventId, userContextService.getCurrentlyLoggedUserEmail());
+        eventService.signOffFromEvent(eventId, userContextService.getCurrentlyLoggedUserEmail());
 
         return REDIRECT_EVENTS + eventId;
     }

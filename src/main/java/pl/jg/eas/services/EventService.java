@@ -17,7 +17,6 @@ import pl.jg.eas.exceptions.UserDoesntExistException;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -161,7 +160,7 @@ public class EventService {
         commentRepository.save(comment);
     }
 
-    public void signUp(Long eventId, String currentlyLoggedUser) {
+    public void signUpForEvent(Long eventId, String currentlyLoggedUser) {
         final Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventDoesntExistException(eventId));
         final User user = userRepository.findUserByEmail(currentlyLoggedUser)
@@ -173,7 +172,7 @@ public class EventService {
     }
 
     @Transactional
-    public void signOff(Long eventId, String currentlyLoggedUser) {
+    public void signOffFromEvent(Long eventId, String currentlyLoggedUser) {
         final Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventDoesntExistException(eventId));
         final User user = userRepository.findUserByEmail(currentlyLoggedUser)
@@ -189,10 +188,14 @@ public class EventService {
 
     }
 
-    public Set<User> getSignedUpUsers(Long eventId) {
+    public List<SignedUpForEventDto> getSignedUpForEventUsers(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventDoesntExistException(eventId))
-                .getSignedUpForEvents();
+                .getSignedUpForEvents()
+                .stream()
+                .map(user -> new SignedUpForEventDto(
+                        user.getNickname()))
+                .collect(Collectors.toList());
     }
 
     public List<EventShortInfoDto> getUserOwnerEvents(String currentlyLoggedUserEmail) {

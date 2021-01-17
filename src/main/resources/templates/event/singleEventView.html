@@ -53,7 +53,7 @@
             Signed up users
         </button>
         <div class="dropdown-menu" style="width: 200px">
-            <span class="dropdown-item-text" th:each="user : ${usersSignedUpFor}" th:text="${user.email}"></span>
+            <span class="dropdown-item-text" th:each="user : ${usersSignedUpFor}" th:text="${user.nickname}"></span>
         </div>
     </div>
 
@@ -100,7 +100,7 @@
     <div class="list-group" th:each="comment : ${event.comments}">
         <div class="list-group-item">
             <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1" th:text="${comment.commentator.email}">Nickname</h5>
+                <h5 class="mb-1" th:text="${comment.commentator.nickname}">Nickname</h5>
                 <small th:text="${#temporals.format(comment.added, 'yyyy-MM-dd HH:mm')}">Added</small>
             </div>
             <p class="mb-1" th:text="${comment.text}">Text</p>
