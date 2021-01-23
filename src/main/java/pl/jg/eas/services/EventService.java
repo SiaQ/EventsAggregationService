@@ -219,23 +219,23 @@ public class EventService {
             return eventRepository.findByStartDateGreaterThanEqualAndEndDateLessThanEqual(
                     LocalDate.parse(after), LocalDate.parse(before), START_DATE)
                     .stream()
-                    .map(event -> new EventApiInfoDto(
-                            event.getTitle(),
-                            event.getStartDate(),
-                            event.getEndDate(),
-                            event.getDescription()
-                    ))
+                    .map(this::convertToApiDto)
                     .collect(Collectors.toList());
         } else {
             return eventRepository.findByStartDateGreaterThanEqual(LocalDate.now(), START_DATE)
                     .stream()
-                    .map(event -> new EventApiInfoDto(
-                            event.getTitle(),
-                            event.getStartDate(),
-                            event.getEndDate(),
-                            event.getDescription()
-                    ))
+                    .map(this::convertToApiDto)
                     .collect(Collectors.toList());
         }
+    }
+
+    private EventApiInfoDto convertToApiDto(Event event) {
+        return new EventApiInfoDto(
+                event.getId(),
+                event.getTitle(),
+                event.getStartDate(),
+                event.getEndDate(),
+                event.getDescription()
+        );
     }
 }

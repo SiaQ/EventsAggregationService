@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class EventApiInfoDto {
+    private Long id;
     private String title;
     private LocalDate startDate;
     private LocalDate endDate;
