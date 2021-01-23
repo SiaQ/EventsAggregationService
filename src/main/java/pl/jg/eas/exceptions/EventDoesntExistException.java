@@ -10,7 +10,7 @@ public class EventDoesntExistException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return String.format("Event identified by %d doesn't exiist.", eventId);
+        return String.format("Event identified by %d doesn't exist.", eventId);
     }
 
     public Long getEventId() {

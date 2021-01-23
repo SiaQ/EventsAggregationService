@@ -19,7 +19,7 @@ public class GlobalErrorHandler {
         this.userContextService = userContextService;
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(UserWithSuchEmailExistsException.class)
     private String handle(UserWithSuchEmailExistsException e) {
 
@@ -43,7 +43,10 @@ public class GlobalErrorHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    private String handle(Exception e) {
+    private String handle(Exception e, Model model) {
+
+        model.addAttribute("loggedAs", userContextService.getCurrentlyLoggedUserEmail());
+
         return "errors/unidentifiedException";
     }
 }

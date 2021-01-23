@@ -41,6 +41,11 @@ public class RegisterController {
 
         userService.registerUser(newUserForm);
 
+        return "redirect:/user-register/thank-you";
+    }
+
+    @GetMapping("/user-register/thank-you")
+    public String userRegisterThankYouPage() {
         return "user/userRegisterThankYouPage";
     }
 }

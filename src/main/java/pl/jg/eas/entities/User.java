@@ -20,7 +20,7 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    @Column(length = 30)
+    @Column(length = 100)
     private String password;
 
     @Column(length = 50)
@@ -28,7 +28,7 @@ public class User {
 
     private LocalDateTime created = LocalDateTime.now();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "users_roles")
     private Set<Role> roles = new HashSet<>();
 

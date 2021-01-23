@@ -29,7 +29,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers("/events/*/edit").hasAnyAuthority(
                             Roles.EVENT_MANAGER.getRoleName(),
                             Roles.ADMIN.getRoleName())
-                    .antMatchers("/events/*/sign-up").hasAuthority(Roles.COMMON_USER.getRoleName())
+                    .antMatchers("/events/*/sign-up").authenticated()
+                    .antMatchers("/events/*/comment/add").authenticated()
                     .anyRequest().permitAll()
                 .and()
                     .exceptionHandling().accessDeniedPage("/not-allowed")

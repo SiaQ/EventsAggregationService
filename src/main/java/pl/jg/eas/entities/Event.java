@@ -31,11 +31,11 @@ public class Event {
     @Column(length = 2000, nullable = false)
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinTable(name = "users_events")
     private User user;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "users_signed_events")
     private final Set<User> signedUpForEvents = new HashSet<>();
 

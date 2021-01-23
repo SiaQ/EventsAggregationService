@@ -2,6 +2,7 @@ package pl.jg.eas.services;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.jg.eas.api.EventApiInfoDto;
 import pl.jg.eas.dao.CommentRepository;
 import pl.jg.eas.dao.EventRepository;
 import pl.jg.eas.dao.UserRepository;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private static final Sort START_DATE = Sort.by("startDate").ascending();
-    private static final String ADDED = "added";
+    private static final Sort ADDED = Sort.by("added").descending();
 
     private final UserContextService userContextService;
     private final UserRepository userRepository;
@@ -59,6 +60,7 @@ public class EventService {
         eventRepository.save(event);
     }
 
+    @Transactional
     public List<EventShortInfoDto> getCurrentAndFutureEvents() {
         return eventRepository.findByEndDateGreaterThanEqual(LocalDate.now(), START_DATE)
                 .stream()
@@ -66,6 +68,7 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<EventShortInfoDto> getEventsContaining(String title, PeriodCriteria periodCriteria) {
 
         if (periodCriteria == PeriodCriteria.FUTURE) {
@@ -97,7 +100,7 @@ public class EventService {
                 event.getDescription()
         );
     }
-
+    @Transactional
     public EventInfoDto getSingleEventInfo(Long eventId) {
         final EventInfoDto eventInfoDto = eventRepository.findById(eventId)
                 .map(event -> new EventInfoDto(event.getId(),
@@ -107,12 +110,12 @@ public class EventService {
                         event.getDescription()))
                 .orElseThrow(() -> new EventDoesntExistException(eventId));
 
-        final List<CommentDto> comments = commentRepository.findByEventId(eventId, Sort.by(ADDED).descending())
+        final List<CommentDto> comments = commentRepository.findByEventId(eventId, ADDED)
                 .stream()
                 .map(comment -> new CommentDto(
                         comment.getAdded(),
                         comment.getCommentText(),
-                        comment.getUser()))
+                        comment.getUser().getNickname()))
                 .collect(Collectors.toList());
 
         eventInfoDto.setComments(comments);
@@ -129,6 +132,7 @@ public class EventService {
                 eventRepository.existsByIdAndUserEmail(eventId, currentlyLoggedUser);
     }
 
+    @Transactional
     public void editEvent(EditEventForm editEventForm, Long eventId) {
 
         final String currentlyLoggedUserEmail = userContextService.getCurrentlyLoggedUserEmail();
@@ -147,6 +151,7 @@ public class EventService {
         eventRepository.save(event);
     }
 
+    @Transactional
     public void addNewComment(Long eventId, NewCommentForm newCommentForm, String currentlyLoggedUser) {
         final Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventDoesntExistException(eventId));
@@ -162,6 +167,7 @@ public class EventService {
         commentRepository.save(comment);
     }
 
+    @Transactional
     public void signUpForEvent(Long eventId, String currentlyLoggedUser) {
         final Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventDoesntExistException(eventId));
@@ -169,8 +175,6 @@ public class EventService {
                 .orElseThrow(() -> new UserDoesntExistException(currentlyLoggedUser));
 
         event.signUp(user);
-
-        eventRepository.save(event);
     }
 
     @Transactional
@@ -190,6 +194,7 @@ public class EventService {
 
     }
 
+    @Transactional
     public List<SignedUpForEventDto> getSignedUpForEventUsers(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventDoesntExistException(eventId))
@@ -200,6 +205,7 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<EventShortInfoDto> getUserOwnerEvents(String currentlyLoggedUserEmail) {
         return eventRepository.findByUserEmail(currentlyLoggedUserEmail, START_DATE)
                 .stream()
@@ -207,17 +213,28 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-    public List<EventShortInfoDto> getFutureEvents(boolean dateFilter, String after, String before) {
+    @Transactional
+    public List<EventApiInfoDto> getFutureEvents(boolean dateFilter, String after, String before) {
         if (dateFilter) {
             return eventRepository.findByStartDateGreaterThanEqualAndEndDateLessThanEqual(
                     LocalDate.parse(after), LocalDate.parse(before), START_DATE)
                     .stream()
-                    .map(this::convertToDto)
+                    .map(event -> new EventApiInfoDto(
+                            event.getTitle(),
+                            event.getStartDate(),
+                            event.getEndDate(),
+                            event.getDescription()
+                    ))
                     .collect(Collectors.toList());
         } else {
             return eventRepository.findByStartDateGreaterThanEqual(LocalDate.now(), START_DATE)
                     .stream()
-                    .map(this::convertToDto)
+                    .map(event -> new EventApiInfoDto(
+                            event.getTitle(),
+                            event.getStartDate(),
+                            event.getEndDate(),
+                            event.getDescription()
+                    ))
                     .collect(Collectors.toList());
         }
     }

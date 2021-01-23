@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.jg.eas.dtos.EditEventForm;
 import pl.jg.eas.dtos.NewCommentForm;
 import pl.jg.eas.dtos.NewEventForm;
@@ -47,6 +48,11 @@ public class EventController {
 
         eventService.addEvent(newEventForm);
 
+        return "redirect:/add-event/thank-you";
+    }
+
+    @GetMapping("/add-event/thank-you")
+    public String addEventThankYouPage(){
         return "event/eventAddedView";
     }
 
@@ -66,6 +72,7 @@ public class EventController {
     @GetMapping("/events/{eventId}")
     public String getSingleEventInfo(
             @PathVariable Long eventId,
+            @RequestParam(required = false) String errorMessage,
             Model model
     ) {
         final String currentlyLoggedUser = userContextService.getCurrentlyLoggedUserEmail();
@@ -78,6 +85,7 @@ public class EventController {
                 eventId, userContextService.getCurrentlyLoggedUserEmail()));
         model.addAttribute("usersSignedUpFor", eventService.getSignedUpForEventUsers(eventId));
         model.addAttribute("event", eventService.getSingleEventInfo(eventId));
+        model.addAttribute("errorMessage", errorMessage);
 
         return "event/singleEventView";
     }
@@ -115,15 +123,17 @@ public class EventController {
     public String addCommentToEventForm(
             @PathVariable Long eventId,
             @ModelAttribute @Valid NewCommentForm newCommentForm,
-            BindingResult bindingResult
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes
     ) {
 
         if (bindingResult.hasErrors()) {
-            return REDIRECT_EVENTS + eventId;
+            return REDIRECT_EVENTS + eventId + "?errorMessage=" + bindingResult.getFieldError().getDefaultMessage();
         }
 
         eventService.addNewComment(eventId, newCommentForm, userContextService.getCurrentlyLoggedUserEmail());
 
+        redirectAttributes.addFlashAttribute("commentAdded", "Comment has been added!");
         return REDIRECT_EVENTS + eventId;
     }
 
